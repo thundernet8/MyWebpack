@@ -1,0 +1,24 @@
+{
+    "name": "mywebpack",
+    "version": "0.0.1",
+    "description": "My webpack integrated CLI for multi-entries and collaborative projects",
+    "main": "./lib/index.js",
+    "repository": "git@github.com:thundernet8/MyWebpack.git",
+    "author": "wuxueqian <wuxueqian2010@hotmail.com>",
+    "license": "MIT",
+    "bin": {
+        "mpk": "./bin/mpk"
+    },
+    "scripts": {
+        "build": "tsc",
+        "prepublish": "npm run build"
+    },
+    "dependencies": {
+        "webpack": "^3.8.1"
+    },
+    "devDependencies": {
+        "@types/node": "^8.0.51",
+        "typescript": "^2.6.1",
+        "yargs": "^10.0.3"
+    }
+}
