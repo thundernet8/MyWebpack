@@ -4,6 +4,7 @@
     "description":
         "My webpack integrated CLI for multi-entries and collaborative projects",
     "main": "./lib/index.js",
+    "types": "./lib/index.d.ts",
     "repository": "git@github.com:thundernet8/MyWebpack.git",
     "author": "wuxueqian <wuxueqian2010@hotmail.com>",
     "license": "MIT",
