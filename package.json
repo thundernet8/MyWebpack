@@ -1,8 +1,7 @@
 {
     "name": "mywebpack",
     "version": "0.0.1",
-    "description":
-        "My webpack integrated CLI for multi-entries and collaborative projects",
+    "description": "My webpack integrated CLI for multi-entries and collaborative projects",
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",
     "repository": "git@github.com:thundernet8/MyWebpack.git",
@@ -14,23 +13,40 @@
     "scripts": {
         "build": "tsc",
         "lint": "tslint -e node_modules typings -c .tslintrc.json src/**/*.ts",
-        "prepublish": "npm run build"
+        "prepublish": "npm run build",
+        "test": "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
+        "test2": "rimraf dist && rimraf lib && webpack"
     },
     "lint-staged": {
-        "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+        "src/**/*.{ts,tsx}": [
+            "lint-staged:ts"
+        ]
     },
     "pre-commit": "lint-staged",
     "dependencies": {
+        "assets-webpack-plugin": "^3.5.1",
+        "babel-core": "^6.26.0",
+        "babel-loader": "^7.1.2",
+        "babel-polyfill": "^6.26.0",
+        "copy-webpack-plugin": "^4.2.1",
+        "cross-env": "^5.1.1",
+        "customized-progress-webpack-plugin": "^0.0.3",
+        "extract-text-webpack-plugin": "^3.0.2",
+        "html-webpack-plugin": "^2.30.1",
+        "optimize-css-assets-webpack-plugin": "^3.2.0",
         "prettier": "^1.8.2",
+        "ts-loader": "^3.1.1",
         "webpack": "^3.8.1",
         "webpack-bundle-analyzer": "^2.9.1",
         "webpack-merge": "^4.1.1"
     },
     "devDependencies": {
-        "@types/node": "^8.0.51",
+        "@types/node": "^8.0.53",
         "@types/webpack": "^3.8.1",
         "@types/yargs": "^8.0.2",
         "lint-staged": "^5.0.0",
+        "react": "^16.1.1",
+        "rimraf": "^2.6.2",
         "typescript": "^2.6.1",
         "yargs": "^10.0.3"
     }
