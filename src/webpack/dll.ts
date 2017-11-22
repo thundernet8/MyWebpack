@@ -2,12 +2,11 @@ import * as path from "path";
 import * as webpack from "webpack";
 const AssetsPlugin = require("assets-webpack-plugin");
 const SimpleProgressWebpackPlugin = require("customized-progress-webpack-plugin");
+const WebpackStableChunkId = require("webpackstablechunkid");
 
 const isDev = process.env.NODE_ENV !== "production";
 
 export default function getDllConfig(rawConfig) {
-    console.log(rawConfig.root);
-
     const getPlugins = function() {
         let plugins = [
             new webpack.DllPlugin({
@@ -20,7 +19,8 @@ export default function getDllConfig(rawConfig) {
                 path: "./"
             }),
             new webpack.HashedModuleIdsPlugin(),
-            new SimpleProgressWebpackPlugin()
+            new SimpleProgressWebpackPlugin(),
+            new WebpackStableChunkId()
         ];
 
         if (!isDev) {

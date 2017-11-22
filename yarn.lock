@@ -6,7 +6,7 @@
   version "8.0.51"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.51.tgz#b31d716fb8d58eeb95c068a039b9b6292817d5fb"
 
-"@types/node@^8.0.53":
+"@types/node@^8.0.53", "@types/node@^8.0.9":
   version "8.0.53"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.53.tgz#396b35af826fa66aad472c8cb7b8d5e277f4e6d8"
 
@@ -1589,6 +1589,12 @@ globals@^9.18.0:
 graceful-fs@^4.1.2, graceful-fs@^4.1.6:
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
+
+gutil@^1.6.4:
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/gutil/-/gutil-1.6.4.tgz#77cf9faa058c0476d63b9d3ac5fbe04e072f6cd2"
+  dependencies:
+    sliced "*"
 
 gzip-size@^3.0.0:
   version "3.0.0"
@@ -3510,6 +3516,10 @@ slice-ansi@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/slice-ansi/-/slice-ansi-0.0.4.tgz#edbf8903f66f7ce2f8eafd6ceed65e264c831b35"
 
+sliced@*:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/sliced/-/sliced-1.0.1.tgz#0b3a662b5d04c3177b1926bea82b03f837a2ef41"
+
 sntp@1.x.x:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/sntp/-/sntp-1.0.9.tgz#6541184cc90aeea6c6e7b35e2659082443c66198"
@@ -3986,6 +3996,12 @@ webpack@^3.8.1:
     watchpack "^1.4.0"
     webpack-sources "^1.0.1"
     yargs "^8.0.2"
+
+webpackstablechunkid@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/webpackstablechunkid/-/webpackstablechunkid-0.2.0.tgz#311ea8486f13dffe0bfdd0255df928011991366d"
+  dependencies:
+    "@types/node" "^8.0.9"
 
 whatwg-fetch@>=0.10.0:
   version "2.0.3"
