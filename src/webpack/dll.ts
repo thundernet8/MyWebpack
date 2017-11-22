@@ -42,7 +42,7 @@ export default function getDllConfig(rawConfig) {
     if (!publicPath.endsWith("/")) {
         publicPath += "/";
     }
-    const config = Object.assign(rawConfig.webpack, {
+    const config = Object.assign({}, rawConfig.webpack, {
         entry: {
             venders: Array.from(
                 new Set(rawConfig.mpk.venders.concat("babel-polyfill"))

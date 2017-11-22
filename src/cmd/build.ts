@@ -20,7 +20,7 @@ export default function build(config) {
             if (err) {
                 throw err;
             } else {
-                console.log(stats);
+                // console.log(stats);
             }
         });
     });
