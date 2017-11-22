@@ -7,24 +7,34 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
     .BundleAnalyzerPlugin;
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
 function default_1(morePlugins, moreRules, root) {
     const getPlugins = function(morePlugins) {
+        // const vendersConfig = require(path.resolve(
+        //     __dirname,
+        //     ".mpk/venders-config.json"
+        // ));
+
+        // const venders = Object.keys(vendersConfig).map(key =>
+        //     vendersConfig[key].js.substr(1)
+        // );
         let plugins = [
             new webpack.HashedModuleIdsPlugin(),
             new SimpleProgressWebpackPlugin(),
-            new webpack.DllReferencePlugin({
-                context: __dirname,
-                manifest: require(path.resolve(root, ".mpk/manifest.json"))
-            }),
+            // new webpack.DllReferencePlugin({
+            //     context: __dirname,
+            //     manifest: require(path.resolve(root, ".mpk/manifest.json"))
+            // }),
             new webpack.DefinePlugin({
                 "process.env": {
                     NODE_ENV: JSON.stringify("production")
                 }
             }),
-            new webpack.optimize.UglifyJsPlugin({
-                compress: { warnings: false },
-                sourceMap: true
-            }),
+            // new webpack.optimize.UglifyJsPlugin({
+            //     compress: { warnings: false },
+            //     sourceMap: true
+            // }),
             new ExtractTextPlugin({
                 filename: `css/styles.[contenthash:8].css`,
                 disable: false,
@@ -35,7 +45,20 @@ function default_1(morePlugins, moreRules, root) {
                 cssProcessor: require("cssnano"),
                 cssProcessorOptions: { discardComments: { removeAll: true } },
                 canPrint: true
-            })
+            }),
+            new HtmlWebpackPlugin({
+                filename: path.resolve(__dirname, "dist/index.html"),
+                template: path.resolve(
+                    __dirname,
+                    "tests/proj/src/templates/index.html"
+                ),
+                inject: true,
+                venders: [],
+                meta: "",
+                htmlDom: "",
+                state: ""
+            }),
+            new webpack.HotModuleReplacementPlugin()
         ];
         if (!!process.env.ANALYZE_ENV) {
             plugins.push(new BundleAnalyzerPlugin());
@@ -131,9 +154,9 @@ function default_1(morePlugins, moreRules, root) {
         },
         output: {
             path: path.resolve("/Users/ezbuy/Desktop/MyWebpack", "dist"),
-            publicPath: "https://assets.example.com/",
-            filename: "js/[name].[chunkhash:8].js",
-            chunkFilename: "js/[name].[chunkhash:8].chunk.js"
+            publicPath: "/",
+            filename: "js/[name].js",
+            chunkFilename: "js/[name].chunk.js"
         },
         resolve: {
             extensions: [
@@ -151,7 +174,23 @@ function default_1(morePlugins, moreRules, root) {
         module: {
             rules: getRules(moreRules)
         },
-        plugins: getPlugins(morePlugins)
+        plugins: getPlugins(morePlugins),
+        devServer: {
+            contentBase: path.resolve(__dirname, "dist"),
+            compress: true,
+            host: "localhost",
+            port: 9001,
+            hot: true,
+            open: true,
+            historyApiFallback: {
+                index: "index.html"
+            },
+            stats: {
+                colors: true
+            }
+            // openPage: "index.html"
+            // publicPath: "http://localhost:9001/"
+        }
     };
     return config;
 }

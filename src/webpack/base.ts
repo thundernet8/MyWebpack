@@ -24,8 +24,8 @@ export default function(
             ".mpk/venders-config.json"
         ));
 
-        const venders = Object.keys(vendersConfig).map(
-            key => vendersConfig[key].js
+        const venders = Object.keys(vendersConfig).map(key =>
+            vendersConfig[key].js.substr(1)
         );
 
         let plugins = [

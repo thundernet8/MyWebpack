@@ -3,17 +3,24 @@ import * as gutil from "gutil";
 import getDllConfig from "../webpack/dll";
 import getDevConfig from "../webpack/dev";
 import getProdConfig from "../webpack/prod";
+import { Compiler } from "webpack";
 
-export default function build(config) {
+export default function build(
+    config,
+    cb?: (compiler: Compiler, webpackConfig) => void
+) {
     const webpackConfigs = [];
     webpackConfigs.push(getDllConfig(config));
     webpackConfigs.push(
         process.env.NODE_ENV !== "production"
-            ? getDevConfig(config)
+            ? getDevConfig(config, {
+                  filename: "index.html",
+                  template: "index.html"
+              })
             : getProdConfig(config)
     );
 
-    const callback = function(err, stats) {
+    const callback = function(err, stats, end: boolean = true) {
         if (err) {
             throw new gutil.PluginError("💡", err);
         } else {
@@ -32,15 +39,18 @@ export default function build(config) {
                     "\r\n\r\n"
             );
         }
+
+        if (end && cb) {
+            cb(this, webpackConfigs[1]);
+        }
     };
 
     webpack(webpackConfigs[0], function(err, stats) {
-        callback(err, stats);
+        callback(err, stats, false);
         // build others when dll build finished
         if (!err) {
-            webpackConfigs.slice(1).forEach(webpackConfig => {
-                webpack(webpackConfig, callback);
-            });
+            const compiler = webpack(webpackConfigs[1]);
+            compiler.run(callback.bind(compiler));
         }
     });
 }

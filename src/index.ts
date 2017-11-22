@@ -1,6 +1,7 @@
 import * as yargs from "yargs";
 import * as path from "path";
 import loadConfig from "./utils/config";
+import start from "./cmd/start";
 import build from "./cmd/build";
 
 const version = require("../package.json").version;
@@ -25,8 +26,9 @@ yargs
         "Start dev server",
         args => args,
         argv => {
-            loadConfig(argv.config);
-            console.log("Start dev server");
+            const config = loadConfig(argv.config);
+            config.root = path.resolve(process.cwd());
+            start(config);
         }
     )
     .command(

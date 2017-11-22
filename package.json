@@ -17,7 +17,9 @@
         "prepublish": "npm run build",
         "test":
             "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
-        "test2": "rimraf dist && rimraf lib && webpack"
+        "test:dev":
+            "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=development ./bin/mpk start -c tests/mpk.config.js",
+        "test2": "rimraf dist && rimraf lib && webpack && webpack-dev-server"
     },
     "lint-staged": {
         "src/**/*.{ts,tsx}": ["lint-staged:ts"]
@@ -39,6 +41,7 @@
         "ts-loader": "^3.1.1",
         "webpack": "^3.8.1",
         "webpack-bundle-analyzer": "^2.9.1",
+        "webpack-dev-server": "^2.9.4",
         "webpack-merge": "^4.1.1",
         "webpackstablechunkid": "^0.2.0"
     },
