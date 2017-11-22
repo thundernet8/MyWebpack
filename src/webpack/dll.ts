@@ -42,12 +42,17 @@ export default function getDllConfig(rawConfig) {
     if (!publicPath.endsWith("/")) {
         publicPath += "/";
     }
+
+    const entry = Array.isArray(rawConfig.mpk.venders)
+        ? {
+              venders: Array.from(
+                  new Set(rawConfig.mpk.venders.concat("babel-polyfill"))
+              )
+          }
+        : rawConfig.mpk.venders;
+
     const config = Object.assign({}, rawConfig.webpack, {
-        entry: {
-            venders: Array.from(
-                new Set(rawConfig.mpk.venders.concat("babel-polyfill"))
-            )
-        },
+        entry,
         output: {
             path: path.resolve(rawConfig.root, rawConfig.mpk.distPath),
             publicPath,

@@ -6,7 +6,7 @@ module.exports = {
     name: "test",
     root: "",
     mpk: {
-        venders: ["react"],
+        venders: ["react"], // array or key-array value pair
         // in production, all styles will be extract to one css file
         styleName: "style",
         distPath: "dist",
