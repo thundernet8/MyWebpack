@@ -15,7 +15,9 @@ module.exports = {
         publicPath: {
             dev: "/",
             prod: "https://assets.example.com/"
-        }
+        },
+        devHost: "localhost",
+        devPort: "9000"
     },
     webpack: {
         entry: {

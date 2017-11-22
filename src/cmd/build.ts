@@ -9,20 +9,12 @@ export default function build(
     config,
     cb?: (compiler: Compiler, webpackConfig) => void
 ) {
-    const webpackConfigs = [];
-    webpackConfigs.push(getDllConfig(config));
-    webpackConfigs.push(
-        process.env.NODE_ENV !== "production"
-            ? getDevConfig(config, {
-                  filename: "index.html",
-                  template: "index.html"
-              })
-            : getProdConfig(config)
-    );
+    const dllConfig = getDllConfig(config);
+    let generalConfig;
 
     const callback = function(err, stats, end: boolean = true) {
         if (err) {
-            throw new gutil.PluginError("💡", err);
+            throw new Error(err);
         } else {
             gutil.log(
                 "🎉  " +
@@ -41,15 +33,22 @@ export default function build(
         }
 
         if (end && cb) {
-            cb(this, webpackConfigs[1]);
+            cb(this, generalConfig);
         }
     };
 
-    webpack(webpackConfigs[0], function(err, stats) {
+    webpack(dllConfig, function(err, stats) {
         callback(err, stats, false);
         // build others when dll build finished
         if (!err) {
-            const compiler = webpack(webpackConfigs[1]);
+            generalConfig =
+                process.env.NODE_ENV !== "production"
+                    ? getDevConfig(config, {
+                          filename: "index.html",
+                          template: "index.html"
+                      })
+                    : getProdConfig(config);
+            const compiler = webpack(generalConfig);
             compiler.run(callback.bind(compiler));
         }
     });

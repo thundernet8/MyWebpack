@@ -12,6 +12,7 @@ export default function start(config) {
                 });
             }
         });
+
         const server = new WebpackDevServer(compiler, devServerOptions);
 
         server.listen(devServerOptions.port, devServerOptions.host, function() {
