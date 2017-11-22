@@ -10,6 +10,8 @@ module.exports = {
         // in production, all styles will be extract to one css file
         styleName: "style",
         distPath: "dist",
+        template: "tests/proj/src/templates", // relative to project root
+        htmlInjects: { key: "value" }, // key-value pairs
         publicPath: {
             dev: "/",
             prod: "https://assets.example.com/"

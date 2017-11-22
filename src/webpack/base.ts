@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as webpack from "webpack";
 // import CopyWebpackPlugin from "copy-webpack-plugin";
-// import HtmlWebpackPlugin from "html-webpack-plugin";
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const SimpleProgressWebpackPlugin = require("customized-progress-webpack-plugin");
@@ -10,12 +10,24 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
     .BundleAnalyzerPlugin;
 const WebpackStableChunkId = require("webpackstablechunkid");
 
-// const vendersConfig = require(".mpk/venders-config.json");
-
 const isDev = process.env.NODE_ENV !== "production";
 
-export default function(mpkConfig) {
+export default function(
+    mpkConfig,
+    outputs?: { template: string; filename: string }[]
+) {
+    outputs = outputs || [{ template: "index.html", filename: "index.html" }];
+
     const getPlugins = function() {
+        const vendersConfig = require(path.resolve(
+            mpkConfig.root,
+            ".mpk/venders-config.json"
+        ));
+
+        const venders = Object.keys(vendersConfig).map(
+            key => vendersConfig[key].js
+        );
+
         let plugins = [
             new webpack.DefinePlugin({
                 "process.env": {
@@ -37,16 +49,28 @@ export default function(mpkConfig) {
             // new webpack.optimize.CommonsChunkPlugin({
             //     name: "app"
             // }),
-            // new HtmlWebpackPlugin({
-            //     filename: path.resolve(__dirname, "../dist/index.html"),
-            //     template: "src/index.html",
-            //     inject: true,
-            //     vendersName: vendersConfig.venders.js,
-            //     meta: "",
-            //     htmlDom: "",
-            //     state: ""
-            // })
         ];
+
+        outputs.forEach(output => {
+            plugins.push(
+                new HtmlWebpackPlugin({
+                    filename: path.resolve(
+                        mpkConfig.mpk.distPath,
+                        output.filename
+                    ),
+                    template: path.resolve(
+                        mpkConfig.root,
+                        mpkConfig.mpk.template,
+                        output.template
+                    ),
+                    inject: true,
+                    venders,
+                    meta: "",
+                    htmlDom: "",
+                    state: ""
+                })
+            );
+        });
 
         if (isDev) {
             plugins = plugins.concat([
