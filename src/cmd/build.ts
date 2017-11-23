@@ -4,13 +4,51 @@ import getDllConfig from "../webpack/dll";
 import getDevConfig from "../webpack/dev";
 import getProdConfig from "../webpack/prod";
 import { Compiler } from "webpack";
+import { IEntry, scanEntries } from "../utils/entry";
+import * as path from "path";
 
 export default function build(
     config,
-    cb?: (compiler: Compiler, webpackConfig) => void
+    cb?: (
+        compiler: Compiler,
+        webpackConfig,
+        allEntries: IEntry[],
+        entries: IEntry[]
+    ) => void
 ) {
     const dllConfig = getDllConfig(config);
     let generalConfig;
+
+    const { root, mpk } = config;
+    const { entryRoot, initEntries } = mpk;
+
+    if (!entryRoot) {
+        throw new Error("Entries folder is not defined in config");
+    }
+
+    // all entries exist in entry folder
+    const allEntries = scanEntries(path.resolve(root, entryRoot));
+    const entries = allEntries.filter(
+        entry =>
+            initEntries.includes(entry.name) ||
+            initEntries.some(item => item.split(".")[0] === entry.name)
+    );
+
+    if (!entries || Object.keys(entries).length < 1) {
+        throw new Error("Should add at least initial entry");
+    }
+
+    config.webpack.entry = entries.reduce((prev, curr) => {
+        prev[curr.name] = curr.path;
+        return prev;
+    }, {});
+
+    const outputs = entries.map(e => {
+        return {
+            filename: e.name + ".html",
+            template: "index.html"
+        };
+    });
 
     const callback = function(err, stats, end: boolean = true) {
         if (err) {
@@ -33,7 +71,7 @@ export default function build(
         }
 
         if (end && cb) {
-            cb(this, generalConfig);
+            cb(this, generalConfig, allEntries, entries);
         }
     };
 
@@ -43,11 +81,8 @@ export default function build(
         if (!err) {
             generalConfig =
                 process.env.NODE_ENV !== "production"
-                    ? getDevConfig(config, {
-                          filename: "index.html",
-                          template: "index.html"
-                      })
-                    : getProdConfig(config);
+                    ? getDevConfig(config, outputs)
+                    : getProdConfig(config, outputs);
             const compiler = webpack(generalConfig);
             compiler.run(callback.bind(compiler));
         }

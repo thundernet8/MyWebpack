@@ -3,9 +3,9 @@ import baseConf from "./base";
 
 export default function getDevConfig(
     mpkConfig,
-    output: { template: string; filename: string }
+    output: { template: string; filename: string }[]
 ) {
-    let devConfig: any = baseConf(mpkConfig, [output]);
+    let devConfig: any = baseConf(mpkConfig, output);
     const { devHost, devPort, preEntries } = mpkConfig.mpk;
     const { entry } = mpkConfig.webpack;
     const wdsEntries = [
@@ -44,7 +44,7 @@ export default function getDevConfig(
     devConfig.devServer = {
         contentBase: path.resolve(mpkConfig.root, mpkConfig.mpk.distPath),
         compress: true,
-        host: devHost,
+        host: devHost.startsWith("http") ? devHost : "http://" + devHost,
         port: devPort,
         inline: true,
         hot: true,

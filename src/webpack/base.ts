@@ -12,6 +12,32 @@ const WebpackStableChunkId = require("webpackstablechunkid");
 
 const isDev = process.env.NODE_ENV !== "production";
 
+export function getHtmlWebpackPluginInstance(
+    mpkConfig,
+    inputFilename,
+    outputFilename
+) {
+    const vendersConfig = require(path.resolve(
+        mpkConfig.root,
+        ".mpk/venders-config.json"
+    ));
+
+    const venders = Object.keys(vendersConfig).map(key =>
+        vendersConfig[key].js.substr(1)
+    );
+
+    return new HtmlWebpackPlugin({
+        filename: path.resolve(mpkConfig.mpk.distPath, outputFilename),
+        template: path.resolve(
+            mpkConfig.root,
+            mpkConfig.mpk.template,
+            inputFilename
+        ),
+        inject: true,
+        venders
+    });
+}
+
 export default function(
     mpkConfig,
     outputs?: { template: string; filename: string }[]
@@ -19,15 +45,6 @@ export default function(
     outputs = outputs || [{ template: "index.html", filename: "index.html" }];
 
     const getPlugins = function() {
-        const vendersConfig = require(path.resolve(
-            mpkConfig.root,
-            ".mpk/venders-config.json"
-        ));
-
-        const venders = Object.keys(vendersConfig).map(key =>
-            vendersConfig[key].js.substr(1)
-        );
-
         let plugins = [
             new webpack.DefinePlugin({
                 "process.env": {
@@ -52,22 +69,11 @@ export default function(
 
         outputs.forEach(output => {
             plugins.push(
-                new HtmlWebpackPlugin({
-                    filename: path.resolve(
-                        mpkConfig.mpk.distPath,
-                        output.filename
-                    ),
-                    template: path.resolve(
-                        mpkConfig.root,
-                        mpkConfig.mpk.template,
-                        output.template
-                    ),
-                    inject: true,
-                    venders,
-                    meta: "",
-                    htmlDom: "",
-                    state: ""
-                })
+                getHtmlWebpackPluginInstance(
+                    mpkConfig,
+                    output.template,
+                    output.filename
+                )
             );
         });
 

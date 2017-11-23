@@ -1,7 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as DynamicEntryPlugin from "webpack/lib/DynamicEntryPlugin";
 
-export default function scanEntries(folder: string) {
+export interface IEntry {
+    name: string;
+    path: string;
+}
+
+export function scanEntries(folder: string): IEntry[] {
     const files = fs.readdirSync(folder);
     if (files.length === 0) {
         throw new Error(`No entry files found in ${folder}`);
@@ -19,3 +25,23 @@ export default function scanEntries(folder: string) {
         };
     });
 }
+
+export function addWebpackEntry(
+    compilation,
+    context,
+    entryName,
+    entryPath
+): Promise<never> {
+    return new Promise((resolve, reject) => {
+        const dep = DynamicEntryPlugin.createDependency(entryPath, entryName);
+        compilation.addEntry(context, dep, name, err => {
+            if (err) return reject(err);
+            resolve();
+        });
+    });
+}
+
+export default {
+    scanEntries,
+    addWebpackEntry
+};

@@ -4,41 +4,26 @@ import * as gutil from "gutil";
 import * as express from "express";
 import * as webpackDevMiddleware from "webpack-dev-middleware";
 import * as webpackHotMiddleware from "webpack-hot-middleware";
-import scanEntries from "../utils/entry";
-import * as path from "path";
+import { IEntry, addWebpackEntry } from "../utils/entry";
+import * as url from "url";
+import { getHtmlWebpackPluginInstance } from "../webpack/base";
+import log from "../utils/log";
 
 export default function start(config) {
-    const { root, mpk } = config;
-    const { entryRoot, initEntries } = mpk;
+    let allEntries: IEntry[];
+    let builtEntries: IEntry[];
+    let buildingEntries: IEntry[] = [];
 
-    if (!entryRoot) {
-        throw new Error("Entries folder is not defined in config");
-    }
+    build(config, function(
+        compiler,
+        webpackConfig,
+        _allEntries: IEntry[],
+        entries: IEntry[]
+    ) {
+        allEntries = _allEntries;
+        builtEntries = entries;
 
-    const entries = scanEntries(path.resolve(root, entryRoot)).filter(
-        entry =>
-            initEntries.includes(entry.name) ||
-            initEntries.some(item => item.split(".")[0] === entry.name)
-    );
-
-    if (!entries || Object.keys(entries).length < 1) {
-        throw new Error("Should add at least initial entry");
-    }
-
-    config.webpack.entry = entries.reduce((prev, curr) => {
-        prev[curr.name] = curr.path;
-        return prev;
-    }, {});
-
-    build(config, function(compiler, webpackConfig) {
-        const devServerOptions = Object.assign({}, webpackConfig.devServer, {
-            before: function(app) {
-                app.use((req, res, next) => {
-                    console.log(`Using middleware for ${req.url}`);
-                    next();
-                });
-            }
-        });
+        const devServerOptions = webpackConfig.devServer;
 
         const server = express();
         const devMiddleware = webpackDevMiddleware(compiler, {
@@ -49,11 +34,7 @@ export default function start(config) {
                 "Access-Control-Allow-Origin": "*"
             })
         });
-        const hotMiddleware = webpackHotMiddleware(compiler, {
-            log: () => {
-                gutil.log("hot middleware");
-            }
-        });
+        const hotMiddleware = webpackHotMiddleware(compiler);
 
         // force page reload when html-webpack-plugin template changes
         compiler.plugin("compilation", function(compilation) {
@@ -61,13 +42,67 @@ export default function start(config) {
                 data,
                 cb
             ) {
+                console.log("html-webpack-plugin-after-emit");
+                log("html-webpack-plugin-after-emit");
                 hotMiddleware.publish({ action: "reload" });
                 cb();
             });
         });
 
+        compiler.plugin("make", function addEntry(compilation, done) {
+            console.log("make");
+            log("make");
+            let promise: Promise<any>;
+            if (buildingEntries.length) {
+                promise = Promise.all(
+                    buildingEntries.map(e => {
+                        return addWebpackEntry(
+                            compilation,
+                            this["context"],
+                            e.name,
+                            e.path
+                        );
+                    })
+                );
+            } else {
+                promise = Promise.resolve();
+            }
+            promise.then(done).catch(done);
+        });
+        compiler.plugin("done", function emitWebpackDone() {
+            console.log("done");
+            log("done");
+            log(compiler["context"]);
+            log("devMiddleware.invalidate");
+            devMiddleware.invalidate();
+        });
+
         server.use((req, res, next) => {
-            console.log(req.url);
+            const urlObj: url.URL = req._parsedUrl;
+            if (urlObj.pathname.endsWith(".html")) {
+                const entryName = urlObj.pathname.substring(
+                    1,
+                    urlObj.pathname.length - 5
+                );
+                if (
+                    builtEntries.findIndex(e => e.name === entryName) < 0 &&
+                    allEntries.findIndex(e => e.name === entryName) >= 0
+                ) {
+                    gutil.log(`> Building new entry: ${entryName}`);
+                    const entry = allEntries.find(e => e.name === entryName);
+                    compiler.apply(
+                        getHtmlWebpackPluginInstance(
+                            config,
+                            "index.html",
+                            entry.name + ".html"
+                        )
+                    );
+                    buildingEntries.push(entry);
+                    // devMiddleware.invalidate();
+                    // TODO next on callback of emitter
+                }
+            }
+
             next();
         });
 
