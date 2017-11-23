@@ -18,20 +18,20 @@ export default function getDllConfig(rawConfig) {
                 filename: ".mpk/venders-config.json",
                 path: "./"
             }),
-            new webpack.HashedModuleIdsPlugin(),
-            new SimpleProgressWebpackPlugin(),
-            new WebpackStableChunkId()
+            new SimpleProgressWebpackPlugin()
         ];
 
         if (!isDev) {
-            plugins.push(
+            plugins = plugins.concat([
+                new WebpackStableChunkId(),
+                new webpack.HashedModuleIdsPlugin(),
                 new webpack.optimize.UglifyJsPlugin({
                     compress: {
                         warnings: false
                     },
                     sourceMap: true
                 })
-            );
+            ]);
         }
         return plugins;
     };

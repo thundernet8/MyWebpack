@@ -36,7 +36,6 @@ export default function(
                         : JSON.stringify("production")
                 }
             }),
-            new webpack.HashedModuleIdsPlugin(),
             new SimpleProgressWebpackPlugin(),
             new webpack.DllReferencePlugin({
                 context: __dirname,
@@ -44,8 +43,8 @@ export default function(
                     mpkConfig.root,
                     ".mpk/manifest.json"
                 ))
-            }),
-            new WebpackStableChunkId()
+            })
+
             // new webpack.optimize.CommonsChunkPlugin({
             //     name: "app"
             // }),
@@ -74,10 +73,12 @@ export default function(
 
         if (isDev) {
             plugins = plugins.concat([
+                new webpack.NamedModulesPlugin(),
                 new webpack.HotModuleReplacementPlugin()
             ]);
         } else {
             plugins = plugins.concat([
+                new webpack.HashedModuleIdsPlugin(),
                 new webpack.optimize.UglifyJsPlugin({
                     compress: { warnings: false },
                     sourceMap: true
@@ -96,7 +97,8 @@ export default function(
                         discardComments: { removeAll: true }
                     },
                     canPrint: true
-                })
+                }),
+                new WebpackStableChunkId()
             ]);
         }
 
@@ -113,16 +115,6 @@ export default function(
 
     const getRules = function() {
         let rules: any[] = [
-            {
-                test: /\.jsx?$/,
-                loader: "babel-loader",
-                exclude: /node_modules/
-            },
-            {
-                test: /\.tsx?$/,
-                loader: "babel-loader!ts-loader",
-                exclude: /node_modules/
-            },
             {
                 test: /\.json$/,
                 loader: "json-loader",
@@ -151,6 +143,16 @@ export default function(
         if (isDev) {
             rules = rules.concat([
                 {
+                    test: /\.jsx?$/,
+                    loader: "react-hot-loader/webpack!babel-loader",
+                    exclude: /node_modules/
+                },
+                {
+                    test: /\.tsx?$/,
+                    loader: "react-hot-loader/webpack!babel-loader!ts-loader",
+                    exclude: /node_modules/
+                },
+                {
                     test: /\.css$/,
                     include: [/global/, /node_modules/],
                     loader: "style-loader!css-loader?sourceMap!postcss-loader"
@@ -176,6 +178,16 @@ export default function(
             ]);
         } else {
             rules = rules.concat([
+                {
+                    test: /\.jsx?$/,
+                    loader: "babel-loader",
+                    exclude: /node_modules/
+                },
+                {
+                    test: /\.tsx?$/,
+                    loader: "babel-loader!ts-loader",
+                    exclude: /node_modules/
+                },
                 {
                     test: /\.css$/,
                     include: [/global/, /node_modules/],

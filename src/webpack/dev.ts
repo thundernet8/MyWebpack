@@ -10,21 +10,26 @@ export default function getDevConfig(
     const devHost = mpkConfig.mpk.devHost;
     const devPort = mpkConfig.mpk.devPort;
     const wdsEntries = [
-        `${mpkConfig.root}/node_modules/webpack-dev-server/client/index.js?${
+        `webpack-hot-middleware/client?path=${
             devHost.startsWith("http") ? devHost : "http://" + devHost
-        }:${devPort}`,
-        "webpack/hot/dev-server"
+        }:${devPort}/__webpack_hmr&overlay=false`,
+        "babel-polyfill"
     ];
+
     if (Array.isArray(entry)) {
-        devConfig.entry = wdsEntries.concat(entry);
+        devConfig.entry = Array.from(new Set(wdsEntries.concat(entry)));
     } else {
         devConfig.entry = {};
         Object.keys(entry).forEach(key => {
             const chunkEntry = entry[key];
             if (Array.isArray(chunkEntry)) {
-                devConfig.entry[key] = wdsEntries.concat(chunkEntry);
+                devConfig.entry[key] = Array.from(
+                    new Set(wdsEntries.concat(chunkEntry))
+                );
             } else {
-                devConfig.entry[key] = wdsEntries.concat([chunkEntry]);
+                devConfig.entry[key] = Array.from(
+                    new Set(wdsEntries.concat(chunkEntry))
+                );
             }
         });
     }
@@ -57,6 +62,9 @@ export default function getDevConfig(
             children: true,
             errorDetails: true,
             colors: true
+        },
+        headers: {
+            "X-Power-By": "MPK"
         }
         // openPage: "index.html",
         // publicPath: "http://localhost:9001/"
