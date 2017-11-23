@@ -17,15 +17,18 @@ module.exports = {
             prod: "https://assets.example.com/"
         },
         devHost: "localhost",
-        devPort: "9000"
+        devPort: "9000",
+        preEntries: ["babel-polyfill"],
+        initEntries: ["businessA.ts"],
+        entryRoot: "tests/proj/src/entries"
     },
     webpack: {
-        entry: {
-            businessA: [
-                // "babel-polyfill",
-                path.resolve(__dirname, "proj/src/entries/businessA.ts")
-            ]
-        },
+        // entry: {
+        //     businessA: [
+        //         // "babel-polyfill",
+        //         path.resolve(__dirname, "proj/src/entries/businessA.ts")
+        //     ]
+        // },
         output: {
             path: path.resolve(__dirname, "../dist/assets/js"),
             publicPath: isDev

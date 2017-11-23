@@ -25,7 +25,13 @@ function defaults(config) {
             prod: "https://assets.example.com/"
         },
         devHost: "localhost",
-        devPort: 9000
+        devPort: 9000,
+        // 前置包Entries
+        preEntries: ["babel-polyfill"],
+        // 预编译的Entries
+        initEntries: ["index.ts"],
+        // Entries所在文件夹(绝对路径或相对项目根目录)
+        entryRoot: "src/entries"
     };
     return Object.assign({}, { mpk: defaultMpk }, config);
 }

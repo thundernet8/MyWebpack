@@ -4,8 +4,32 @@ import * as gutil from "gutil";
 import * as express from "express";
 import * as webpackDevMiddleware from "webpack-dev-middleware";
 import * as webpackHotMiddleware from "webpack-hot-middleware";
+import scanEntries from "../utils/entry";
+import * as path from "path";
 
 export default function start(config) {
+    const { root, mpk } = config;
+    const { entryRoot, initEntries } = mpk;
+
+    if (!entryRoot) {
+        throw new Error("Entries folder is not defined in config");
+    }
+
+    const entries = scanEntries(path.resolve(root, entryRoot)).filter(
+        entry =>
+            initEntries.includes(entry.name) ||
+            initEntries.some(item => item.split(".")[0] === entry.name)
+    );
+
+    if (!entries || Object.keys(entries).length < 1) {
+        throw new Error("Should add at least initial entry");
+    }
+
+    config.webpack.entry = entries.reduce((prev, curr) => {
+        prev[curr.name] = curr.path;
+        return prev;
+    }, {});
+
     build(config, function(compiler, webpackConfig) {
         const devServerOptions = Object.assign({}, webpackConfig.devServer, {
             before: function(app) {
@@ -61,6 +85,10 @@ export default function start(config) {
                 }\r\n`
             );
         });
+
+        console.log("xxxxxx");
+        console.log("xxxxxx");
+        console.log("xxxxxx");
 
         server.listen(devServerOptions.port, "0.0.0.0");
 

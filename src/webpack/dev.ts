@@ -6,14 +6,13 @@ export default function getDevConfig(
     output: { template: string; filename: string }
 ) {
     let devConfig: any = baseConf(mpkConfig, [output]);
-    const entry = mpkConfig.webpack.entry;
-    const devHost = mpkConfig.mpk.devHost;
-    const devPort = mpkConfig.mpk.devPort;
+    const { devHost, devPort, preEntries } = mpkConfig.mpk;
+    const { entry } = mpkConfig.webpack;
     const wdsEntries = [
         `webpack-hot-middleware/client?path=${
             devHost.startsWith("http") ? devHost : "http://" + devHost
         }:${devPort}/__webpack_hmr&overlay=false`,
-        "babel-polyfill"
+        ...preEntries
     ];
 
     if (Array.isArray(entry)) {
@@ -64,7 +63,7 @@ export default function getDevConfig(
             colors: true
         },
         headers: {
-            "X-Power-By": "MPK"
+            "X-Pack-With": "MPK"
         }
         // openPage: "index.html",
         // publicPath: "http://localhost:9001/"
