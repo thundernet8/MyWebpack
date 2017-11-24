@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as webpack from "webpack";
 const AssetsPlugin = require("assets-webpack-plugin");
-const SimpleProgressWebpackPlugin = require("customized-progress-webpack-plugin");
+// const SimpleProgressWebpackPlugin = require("customized-progress-webpack-plugin");
 const WebpackStableChunkId = require("webpackstablechunkid");
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -17,8 +17,8 @@ export default function getDllConfig(rawConfig) {
             new AssetsPlugin({
                 filename: ".mpk/venders-config.json",
                 path: "./"
-            }),
-            new SimpleProgressWebpackPlugin()
+            })
+            // new SimpleProgressWebpackPlugin()
         ];
 
         if (!isDev) {

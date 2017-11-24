@@ -10,6 +10,7 @@ import { getHtmlWebpackPluginInstance } from "../webpack/base";
 import log from "../utils/log";
 import { EventEmitter } from "events";
 import { Compiler } from "webpack";
+import * as colors from "colors";
 
 enum EntryTaskStatus {
     BUILT,
@@ -19,6 +20,7 @@ enum EntryTaskStatus {
 
 class EntryTaskManager {
     private mpkConfig;
+    private webpackConfig;
     private compiler: Compiler;
     private devMiddleware;
     private allEntries: IEntry[] = [];
@@ -28,15 +30,18 @@ class EntryTaskManager {
     private entryTaskQueue: string[] = [];
     private emitter: EventEmitter = new EventEmitter();
     private entryStatus: { [entryName: string]: EntryTaskStatus } = {};
+    private preEntriesBuilt: boolean = false;
 
     public constructor(
         mpkConfig,
+        webpackConfig,
         compiler: Compiler,
         devMiddleware,
         allEntries: IEntry[],
         prebuildEntryNames: string[]
     ) {
         this.mpkConfig = mpkConfig;
+        this.webpackConfig = webpackConfig;
         this.compiler = compiler;
         this.devMiddleware = devMiddleware;
         this.allEntries = allEntries;
@@ -56,18 +61,27 @@ class EntryTaskManager {
             return Promise.resolve();
         }
 
-        this.entryStatus[entryName] = EntryTaskStatus.BUILDING;
-        gutil.log(`🛠️ Building new entry: ${entryName}`);
+        if (!this.builtEntryNames.includes(entryName)) {
+            gutil.log(
+                "\r\n🛠️  " +
+                    colors.yellow(`Building new entry: ${entryName}`) +
+                    "\r\n"
+            );
+            this.addHtmlPage(entryName);
+        }
         this.addEntryTask(entryName);
 
+        this.entryStatus[entryName] = EntryTaskStatus.BUILDING;
         this.devMiddleware.invalidate();
 
         return new Promise((resolve, reject) => {
             this.emitter.once("done", () => {
                 this.builtEntryNames.push(entryName);
+                this.toggleEntryStatus(entryName, EntryTaskStatus.BUILT);
                 resolve();
             });
             this.emitter.once("error", err => {
+                this.toggleEntryStatus(entryName, EntryTaskStatus.UNBUILD);
                 reject(err);
             });
         });
@@ -77,26 +91,53 @@ class EntryTaskManager {
         const { entryTaskQueue } = this;
         entryTaskQueue.push(entryName);
         this.entryTaskQueue = Array.from(new Set(entryTaskQueue));
-        this.addHtmlPage(entryName);
     }
 
     private addHtmlPage(entryName) {
-        if (this.builtEntryNames.includes(entryName)) {
-            return;
-        }
+        // if (this.builtEntryNames.includes(entryName)) {
+        //     return;
+        // }
         this.compiler.apply(
-            getHtmlWebpackPluginInstance(
-                this.mpkConfig,
-                "index.html",
-                entryName + ".html"
-            )
+            getHtmlWebpackPluginInstance(this.mpkConfig, {
+                template: "index.html",
+                name: entryName
+            })
         );
     }
 
+    private toggleEntryStatus(entryName: string, status: EntryTaskStatus) {
+        const { entryStatus } = this;
+        entryStatus[entryName] = status;
+        log("-------------------");
+        log(JSON.stringify(entryStatus));
+        this.entryStatus = Object.assign({}, entryStatus);
+    }
+
     private hookupCompiler() {
-        const { compiler, emitter, allEntries, builtEntryNames } = this;
+        const {
+            webpackConfig,
+            compiler,
+            emitter,
+            allEntries,
+            builtEntryNames
+        } = this;
+        const { publicPath, filename } = webpackConfig.output;
 
         compiler.plugin("make", (compilation, done) => {
+            compilation.plugin(
+                "html-webpack-plugin-before-html-processing",
+                function(htmlPluginData, callback) {
+                    const entryName = htmlPluginData.outputName.substr(
+                        0,
+                        htmlPluginData.outputName.length - 5
+                    );
+                    htmlPluginData.assets.js = [
+                        publicPath + filename.replace("[name]", entryName)
+                    ];
+                    callback(null, htmlPluginData);
+                }
+            );
+
             let promise: Promise<any>;
             const newEntryNames = this.entryTaskQueue.filter(
                 n => !builtEntryNames.includes(n)
@@ -125,6 +166,8 @@ class EntryTaskManager {
         compiler.plugin("done", stats => {
             this.entryTaskQueue = [];
             emitter.emit("done");
+            this.preEntriesBuilt &&
+                gutil.log("\r\n🎉   " + colors.green(`Building successfully.`));
         });
     }
 
@@ -134,10 +177,17 @@ class EntryTaskManager {
             e => !builtEntryNames.includes(e)
         );
         if (entries.length > 0) {
-            gutil.log(`🛠️ Pre-Building entries: ${entries.join(" ")}`);
+            gutil.log(
+                "\r\n🛠️  " +
+                    colors.yellow(
+                        `Pre-Building entries: ${entries.join(" ")}`
+                    ) +
+                    "\r\n"
+            );
             entries.forEach(e => {
-                this.entryStatus[e] = EntryTaskStatus.BUILDING;
+                this.toggleEntryStatus(e, EntryTaskStatus.BUILDING);
                 this.addEntryTask(e);
+                this.addHtmlPage(e);
             });
 
             this.devMiddleware.invalidate();
@@ -147,9 +197,18 @@ class EntryTaskManager {
                     this.builtEntryNames = []
                         .concat(this.builtEntryNames)
                         .concat(entries);
+                    this.preEntriesBuilt = true;
+                    entries.forEach(e => {
+                        this.toggleEntryStatus(e, EntryTaskStatus.BUILT);
+                        this.addEntryTask(e);
+                    });
                     resolve();
                 });
                 this.emitter.once("error", err => {
+                    entries.forEach(e => {
+                        this.toggleEntryStatus(e, EntryTaskStatus.UNBUILD);
+                        this.addEntryTask(e);
+                    });
                     reject(err);
                 });
             });
@@ -191,6 +250,7 @@ export default function start(config) {
 
         const taskManager = new EntryTaskManager(
             config,
+            webpackConfig,
             compiler,
             devMiddleware,
             allEntries,
@@ -207,6 +267,9 @@ export default function start(config) {
 
                 taskManager
                     .execEntryTask(entryName)
+                    // .then(() => {
+                    //     hotMiddleware.publish({ action: "reload" });
+                    // })
                     .then(next)
                     .catch(err => log(err.toString()));
             } else {
@@ -218,7 +281,7 @@ export default function start(config) {
 
         server.use(hotMiddleware);
 
-        // server.use("/", express.static(config.mpk.distPath));
+        server.use("/", express.static(config.mpk.distPath));
 
         server.locals.env = process.env.NODE_ENV;
         devMiddleware.waitUntilValid(() => {
@@ -226,9 +289,13 @@ export default function start(config) {
                 .checkPrebuildEntries()
                 .then(() => {
                     gutil.log(
-                        `Starting dev server on ${devServerOptions.host}:${
-                            devServerOptions.port
-                        }\r\n`
+                        "\r\n📡  " +
+                            colors.green(
+                                `Starting dev server on ${
+                                    devServerOptions.host
+                                }:${devServerOptions.port}`
+                            ) +
+                            "\r\n"
                     );
                 })
                 .catch(e => {

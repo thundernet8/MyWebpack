@@ -1,11 +1,8 @@
 import * as path from "path";
 import baseConf from "./base";
 
-export default function getProdConfig(
-    mpkConfig,
-    output: { template: string; filename: string }[]
-) {
-    let prodConfig: any = baseConf(mpkConfig, output);
+export default function getProdConfig(mpkConfig) {
+    let prodConfig: any = baseConf(mpkConfig);
     const { preEntries } = mpkConfig.mpk;
     const { entry } = mpkConfig.webpack;
 

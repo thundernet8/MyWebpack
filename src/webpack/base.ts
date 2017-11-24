@@ -4,19 +4,20 @@ import * as webpack from "webpack";
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const SimpleProgressWebpackPlugin = require("customized-progress-webpack-plugin");
+// const SimpleProgressWebpackPlugin = require("customized-progress-webpack-plugin");
 
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
     .BundleAnalyzerPlugin;
 const WebpackStableChunkId = require("webpackstablechunkid");
 
+export interface IEntryInfo {
+    template: string;
+    name: string;
+}
+
 const isDev = process.env.NODE_ENV !== "production";
 
-export function getHtmlWebpackPluginInstance(
-    mpkConfig,
-    inputFilename,
-    outputFilename
-) {
+export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
     const vendersConfig = require(path.resolve(
         mpkConfig.root,
         ".mpk/venders-config.json"
@@ -27,22 +28,23 @@ export function getHtmlWebpackPluginInstance(
     );
 
     return new HtmlWebpackPlugin({
-        filename: path.resolve(mpkConfig.mpk.distPath, outputFilename),
+        filename: path.resolve(mpkConfig.mpk.distPath, entry.name + ".html"),
         template: path.resolve(
             mpkConfig.root,
             mpkConfig.mpk.template,
-            inputFilename
+            entry.template
         ),
         inject: true,
+        cache: false,
         venders
     });
 }
 
 export default function(
-    mpkConfig,
-    outputs?: { template: string; filename: string }[]
+    mpkConfig
+    // outputs?: { template: string; filename: string }[]
 ) {
-    outputs = outputs || [{ template: "index.html", filename: "index.html" }];
+    // outputs = outputs || [{ template: "index.html", filename: "index.html" }];
 
     const getPlugins = function() {
         let plugins = [
@@ -53,7 +55,7 @@ export default function(
                         : JSON.stringify("production")
                 }
             }),
-            new SimpleProgressWebpackPlugin(),
+            // new SimpleProgressWebpackPlugin(),
             new webpack.DllReferencePlugin({
                 context: __dirname,
                 manifest: require(path.resolve(
@@ -67,15 +69,15 @@ export default function(
             // }),
         ];
 
-        outputs.forEach(output => {
-            plugins.push(
-                getHtmlWebpackPluginInstance(
-                    mpkConfig,
-                    output.template,
-                    output.filename
-                )
-            );
-        });
+        // outputs.forEach(output => {
+        //     plugins.push(
+        //         getHtmlWebpackPluginInstance(mpkConfig, {
+        //             template: output.template,
+        //             name: output.filename,
+        //             publicPath: ""
+        //         })
+        //     );
+        // });
 
         if (isDev) {
             plugins = plugins.concat([

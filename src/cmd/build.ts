@@ -40,23 +40,15 @@ export default function build(
     // }
 
     let webpackEntry;
-    let outputs;
 
     if (process.env.NODE_ENV === "production") {
         webpackEntry = prebuildEntries.reduce((prev, curr) => {
             prev[curr.name] = curr.path;
             return prev;
         }, {});
-        outputs = prebuildEntries.map(e => {
-            return {
-                filename: e.name + ".html",
-                template: "index.html"
-            };
-        });
     } else {
         webpackEntry = {};
         webpackEntry["empty"] = getEmptyEntry();
-        outputs = [];
     }
 
     config.webpack.entry = webpackEntry;
@@ -66,8 +58,9 @@ export default function build(
             throw new Error(err);
         } else {
             gutil.log(
-                "🎉  " +
+                "\r\n" +
                     stats.toString({
+                        version: false,
                         timings: false,
                         assets: true,
                         chunks: false, // Makes the build much quieter
@@ -77,7 +70,7 @@ export default function build(
                         errorDetails: true,
                         colors: true
                     }) +
-                    "\r\n\r\n"
+                    "\r\n"
             );
         }
 
@@ -92,8 +85,8 @@ export default function build(
         if (!err) {
             generalConfig =
                 process.env.NODE_ENV !== "production"
-                    ? getDevConfig(config, outputs)
-                    : getProdConfig(config, outputs);
+                    ? getDevConfig(config)
+                    : getProdConfig(config);
             const compiler = webpack(generalConfig);
             compiler.run(callback.bind(compiler));
         }

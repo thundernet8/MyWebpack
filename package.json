@@ -1,8 +1,7 @@
 {
     "name": "mywebpack",
     "version": "0.0.1",
-    "description":
-        "My webpack integrated CLI for multi-entries and collaborative projects",
+    "description": "My webpack integrated CLI for multi-entries and collaborative projects",
     "main": "./lib/test.js",
     "types": "./lib/index.d.ts",
     "repository": "git@github.com:thundernet8/MyWebpack.git",
@@ -15,14 +14,14 @@
         "build": "tsc",
         "lint": "tslint -e node_modules typings -c .tslintrc.json src/**/*.ts",
         "prepublish": "npm run build",
-        "test":
-            "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
-        "test:dev":
-            "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=_test ./bin/mpk start -c tests/mpk.config.js",
+        "test": "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
+        "test:dev": "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=_test ./bin/mpk start -c tests/mpk.config.js",
         "test2": "rimraf dist && rimraf lib && webpack && webpack-dev-server"
     },
     "lint-staged": {
-        "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+        "src/**/*.{ts,tsx}": [
+            "lint-staged:ts"
+        ]
     },
     "pre-commit": "lint-staged",
     "dependencies": {
@@ -30,6 +29,7 @@
         "babel-core": "^6.26.0",
         "babel-loader": "^7.1.2",
         "babel-polyfill": "^6.26.0",
+        "colors": "^1.1.2",
         "copy-webpack-plugin": "^4.2.1",
         "cross-env": "^5.1.1",
         "customized-progress-webpack-plugin": "^0.0.3",

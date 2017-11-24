@@ -1,11 +1,8 @@
 import * as path from "path";
 import baseConf from "./base";
 
-export default function getDevConfig(
-    mpkConfig,
-    output: { template: string; filename: string }[]
-) {
-    let devConfig: any = baseConf(mpkConfig, output);
+export default function getDevConfig(mpkConfig) {
+    let devConfig: any = baseConf(mpkConfig);
     const { devHost, devPort, preEntries } = mpkConfig.mpk;
     const { entry } = mpkConfig.webpack;
     const wdsEntries = [
