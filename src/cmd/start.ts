@@ -59,11 +59,19 @@ class EntryTaskManager {
         this.addEntryTask(entryName);
 
         //
+        this.compiler.apply(
+            getHtmlWebpackPluginInstance(
+                this.mpkConfig,
+                "index.html",
+                entryName + ".html"
+            )
+        );
 
         this.devMiddleware.invalidate();
 
         return new Promise((resolve, reject) => {
             this.emitter.once("done", () => {
+                this.builtEntryNames.push(entryName);
                 resolve();
             });
             this.emitter.once("error", err => {
@@ -89,6 +97,20 @@ class EntryTaskManager {
             builtEntryNames
         } = this;
 
+        compiler.plugin("compile", function(params) {
+            console.log("The compiler is starting to compile...");
+        });
+
+        compiler.plugin("emit", function(compilation, callback) {
+            console.log("The compilation is going to emit files...");
+            callback();
+        });
+
+        compiler.plugin("after-compile", function(compilation, callback) {
+            console.log("The compiler is done compile...");
+            callback();
+        });
+
         compiler.plugin("make", (compilation, done) => {
             log("make");
             let promise: Promise<any>;
@@ -97,16 +119,16 @@ class EntryTaskManager {
             );
             log("task");
             log(this.entryTaskQueue.join("---"));
-
+            log(typeof hotMiddleware);
             // force page reload when html-webpack-plugin template changes
-            compilation.plugin("html-webpack-plugin-after-emit", function(
-                data,
-                cb
-            ) {
-                log("html-webpack-plugin-after-emit");
-                hotMiddleware.publish({ action: "reload" });
-                cb();
-            });
+            // compilation.plugin("html-webpack-plugin-after-emit", function(
+            //     data,
+            //     cb
+            // ) {
+            //     log("html-webpack-plugin-after-emit");
+            //     hotMiddleware.publish({ action: "reload" });
+            //     cb();
+            // });
 
             if (newEntryNames.length > 0) {
                 promise = Promise.all(
@@ -121,8 +143,9 @@ class EntryTaskManager {
                     })
                 ).then((entries: IEntry[]) => {
                     entries.forEach(e => {
-                        this.htmlPageQueue.push(e.name + ".html");
+                        //this.htmlPageQueue.push(e.name + ".html");
                     });
+                    log(JSON.stringify(Object.keys(compilation.entries)));
                 });
             } else {
                 promise = Promise.resolve();
@@ -132,9 +155,13 @@ class EntryTaskManager {
             });
         });
 
-        compiler.plugin("done", (_err, c) => {
+        compiler.plugin("done", stats => {
             console.log("done");
-            c && console.log(Object.keys(c));
+            if (stats) {
+                const { assets, chunks } = stats.toJson();
+                console.log(Object.keys(assets));
+                console.log(Object.keys(chunks));
+            }
             log("done");
             log(compiler["context"]);
             log("devMiddleware.invalidate");
