@@ -55,7 +55,7 @@ export default function build(
         });
     } else {
         webpackEntry = {};
-        webpackEntry["empty"] = getEmptyEntry(true);
+        webpackEntry["empty"] = getEmptyEntry();
         outputs = [];
     }
 

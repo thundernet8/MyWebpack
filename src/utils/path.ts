@@ -10,7 +10,8 @@ export function getPackagePath(isTest: boolean = false) {
     return path.resolve(projectRoot, `./node_modules/${pkg.name}`);
 }
 
-export function getEmptyEntry(isTest: boolean = false) {
+export function getEmptyEntry() {
+    const isTest = pkg.name === "mywebpack";
     const pkgPath = getPackagePath(isTest);
     return path.resolve(pkgPath, "./src/resources/empty.ts");
 }
