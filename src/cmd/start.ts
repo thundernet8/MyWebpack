@@ -8,20 +8,173 @@ import { IEntry, addWebpackEntry } from "../utils/entry";
 import * as url from "url";
 import { getHtmlWebpackPluginInstance } from "../webpack/base";
 import log from "../utils/log";
+import { EventEmitter } from "events";
+import { Compiler } from "webpack";
+
+enum EntryTaskStatus {
+    BUILT,
+    BUILDING,
+    UNBUILD
+}
+
+class EntryTaskManager {
+    private mpkConfig;
+    private compiler: Compiler;
+    private devMiddleware;
+    private hotMiddleware;
+    private allEntries: IEntry[] = [];
+    private allEntryNames: string[] = [];
+    private builtEntryNames: string[] = [];
+    private entryTaskQueue: string[] = [];
+    private emitter: EventEmitter = new EventEmitter();
+
+    private htmlPageQueue: string[] = [];
+
+    public constructor(
+        mpkConfig,
+        compiler: Compiler,
+        devMiddleware,
+        hotMiddleware,
+        allEntries: IEntry[],
+        builtEntryNames: string[]
+    ) {
+        this.mpkConfig = mpkConfig;
+        this.compiler = compiler;
+        this.devMiddleware = devMiddleware;
+        this.hotMiddleware = hotMiddleware;
+        this.allEntries = allEntries;
+        this.allEntryNames = allEntries.map(e => e.name);
+        this.builtEntryNames = builtEntryNames;
+        this.hookupCompiler();
+    }
+
+    public execEntryTask(entryName: string): Promise<void> {
+        if (
+            !this.allEntryNames.includes(entryName) ||
+            this.builtEntryNames.includes(entryName)
+        ) {
+            return Promise.resolve();
+        }
+        gutil.log(`🛠️ Building new entry: ${entryName}`);
+        this.addEntryTask(entryName);
+
+        //
+
+        this.devMiddleware.invalidate();
+
+        return new Promise((resolve, reject) => {
+            this.emitter.once("done", () => {
+                resolve();
+            });
+            this.emitter.once("error", err => {
+                reject(err);
+            });
+        });
+    }
+
+    private addEntryTask(entryName) {
+        const { entryTaskQueue } = this;
+        entryTaskQueue.push(entryName);
+        this.entryTaskQueue = Array.from(new Set(entryTaskQueue));
+    }
+
+    private hookupCompiler() {
+        const {
+            mpkConfig,
+            compiler,
+            emitter,
+            devMiddleware,
+            hotMiddleware,
+            allEntries,
+            builtEntryNames
+        } = this;
+
+        compiler.plugin("make", (compilation, done) => {
+            log("make");
+            let promise: Promise<any>;
+            const newEntryNames = this.entryTaskQueue.filter(
+                n => !builtEntryNames.includes(n)
+            );
+            log("task");
+            log(this.entryTaskQueue.join("---"));
+
+            // force page reload when html-webpack-plugin template changes
+            compilation.plugin("html-webpack-plugin-after-emit", function(
+                data,
+                cb
+            ) {
+                log("html-webpack-plugin-after-emit");
+                hotMiddleware.publish({ action: "reload" });
+                cb();
+            });
+
+            if (newEntryNames.length > 0) {
+                promise = Promise.all(
+                    newEntryNames.map(n => {
+                        const e = allEntries.find(item => item.name === n);
+                        return addWebpackEntry(
+                            compilation,
+                            this["context"],
+                            e.name,
+                            e.path
+                        ).then(() => e);
+                    })
+                ).then((entries: IEntry[]) => {
+                    entries.forEach(e => {
+                        this.htmlPageQueue.push(e.name + ".html");
+                    });
+                });
+            } else {
+                promise = Promise.resolve();
+            }
+            promise.then(done).catch(err => {
+                emitter.emit("error", err);
+            });
+        });
+
+        compiler.plugin("done", (_err, c) => {
+            console.log("done");
+            c && console.log(Object.keys(c));
+            log("done");
+            log(compiler["context"]);
+            log("devMiddleware.invalidate");
+            this.entryTaskQueue = [];
+            log(this.htmlPageQueue.join("---"));
+            if (this.htmlPageQueue.length > 0) {
+                this.htmlPageQueue.forEach(page => {
+                    compiler.apply(
+                        getHtmlWebpackPluginInstance(
+                            mpkConfig,
+                            "index.html",
+                            page
+                        )
+                    );
+                });
+                this.htmlPageQueue = [];
+                devMiddleware.invalidate();
+            } else {
+                emitter.emit("done");
+            }
+        });
+    }
+}
 
 export default function start(config) {
-    let allEntries: IEntry[];
-    let builtEntries: IEntry[];
-    let buildingEntries: IEntry[] = [];
+    const entryStatus: { [entryName: string]: EntryTaskStatus } = {};
 
     build(config, function(
         compiler,
         webpackConfig,
-        _allEntries: IEntry[],
+        allEntries: IEntry[],
         entries: IEntry[]
     ) {
-        allEntries = _allEntries;
-        builtEntries = entries;
+        allEntries.forEach(e => {
+            entryStatus[e.name] = EntryTaskStatus.UNBUILD;
+        });
+
+        entries.forEach(e => {
+            entryStatus[e.name] = EntryTaskStatus.BUILT;
+        });
 
         const devServerOptions = webpackConfig.devServer;
 
@@ -36,46 +189,14 @@ export default function start(config) {
         });
         const hotMiddleware = webpackHotMiddleware(compiler);
 
-        // force page reload when html-webpack-plugin template changes
-        compiler.plugin("compilation", function(compilation) {
-            compilation.plugin("html-webpack-plugin-after-emit", function(
-                data,
-                cb
-            ) {
-                console.log("html-webpack-plugin-after-emit");
-                log("html-webpack-plugin-after-emit");
-                hotMiddleware.publish({ action: "reload" });
-                cb();
-            });
-        });
-
-        compiler.plugin("make", function addEntry(compilation, done) {
-            console.log("make");
-            log("make");
-            let promise: Promise<any>;
-            if (buildingEntries.length) {
-                promise = Promise.all(
-                    buildingEntries.map(e => {
-                        return addWebpackEntry(
-                            compilation,
-                            this["context"],
-                            e.name,
-                            e.path
-                        );
-                    })
-                );
-            } else {
-                promise = Promise.resolve();
-            }
-            promise.then(done).catch(done);
-        });
-        compiler.plugin("done", function emitWebpackDone() {
-            console.log("done");
-            log("done");
-            log(compiler["context"]);
-            log("devMiddleware.invalidate");
-            devMiddleware.invalidate();
-        });
+        const taskManager = new EntryTaskManager(
+            config,
+            compiler,
+            devMiddleware,
+            hotMiddleware,
+            allEntries,
+            entries.map(e => e.name)
+        );
 
         server.use((req, res, next) => {
             const urlObj: url.URL = req._parsedUrl;
@@ -84,26 +205,32 @@ export default function start(config) {
                     1,
                     urlObj.pathname.length - 5
                 );
-                if (
-                    builtEntries.findIndex(e => e.name === entryName) < 0 &&
-                    allEntries.findIndex(e => e.name === entryName) >= 0
-                ) {
-                    gutil.log(`> Building new entry: ${entryName}`);
-                    const entry = allEntries.find(e => e.name === entryName);
-                    compiler.apply(
-                        getHtmlWebpackPluginInstance(
-                            config,
-                            "index.html",
-                            entry.name + ".html"
-                        )
-                    );
-                    buildingEntries.push(entry);
-                    // devMiddleware.invalidate();
-                    // TODO next on callback of emitter
-                }
+                // if (
+                //     !builtEntryNames.includes(entryName) &&
+                //     allEntryNames.includes(entryName)
+                // ) {
+                //     gutil.log(`🛠️ Building new entry: ${entryName}`);
+                //     // compiler.apply(
+                //     //     getHtmlWebpackPluginInstance(
+                //     //         config,
+                //     //         "index.html",
+                //     //         entry.name + ".html"
+                //     //     )
+                //     // );
+                //     entryStatus[entryName] = EntryTaskStatus.UNBUILD;
+                //     buildingEntryNames.push(entryName);
+                //     devMiddleware.invalidate();
+                //     // TODO next on callback of emitter
+                // } else {
+                //     next();
+                // }
+                taskManager
+                    .execEntryTask(entryName)
+                    .then(next)
+                    .catch(err => log(err.toString()));
+            } else {
+                next();
             }
-
-            next();
         });
 
         server.use(devMiddleware);

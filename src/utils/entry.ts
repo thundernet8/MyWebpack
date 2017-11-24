@@ -31,12 +31,15 @@ export function addWebpackEntry(
     context,
     entryName,
     entryPath
-): Promise<never> {
+): Promise<void> {
     return new Promise((resolve, reject) => {
         const dep = DynamicEntryPlugin.createDependency(entryPath, entryName);
-        compilation.addEntry(context, dep, name, err => {
-            if (err) return reject(err);
-            resolve();
+        compilation.addEntry(context, dep, entryName, err => {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve();
+            }
         });
     });
 }
