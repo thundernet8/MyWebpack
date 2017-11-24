@@ -6,6 +6,7 @@ import getProdConfig from "../webpack/prod";
 import { Compiler } from "webpack";
 import { IEntry, scanEntries } from "../utils/entry";
 import * as path from "path";
+import { getEmptyEntry } from "../utils/path";
 
 export default function build(
     config,
@@ -28,27 +29,37 @@ export default function build(
 
     // all entries exist in entry folder
     const allEntries = scanEntries(path.resolve(root, entryRoot));
-    const entries = allEntries.filter(
+    const prebuildEntries = allEntries.filter(
         entry =>
             initEntries.includes(entry.name) ||
             initEntries.some(item => item.split(".")[0] === entry.name)
     );
 
-    if (!entries || Object.keys(entries).length < 1) {
-        throw new Error("Should add at least initial entry");
+    // if (!entries || Object.keys(entries).length < 1) {
+    //     throw new Error("Should add at least initial entry");
+    // }
+
+    let webpackEntry;
+    let outputs;
+
+    if (process.env.NODE_ENV === "production") {
+        webpackEntry = prebuildEntries.reduce((prev, curr) => {
+            prev[curr.name] = curr.path;
+            return prev;
+        }, {});
+        outputs = prebuildEntries.map(e => {
+            return {
+                filename: e.name + ".html",
+                template: "index.html"
+            };
+        });
+    } else {
+        webpackEntry = {};
+        webpackEntry["empty"] = getEmptyEntry(true);
+        outputs = [];
     }
 
-    config.webpack.entry = entries.reduce((prev, curr) => {
-        prev[curr.name] = curr.path;
-        return prev;
-    }, {});
-
-    const outputs = entries.map(e => {
-        return {
-            filename: e.name + ".html",
-            template: "index.html"
-        };
-    });
+    config.webpack.entry = webpackEntry;
 
     const callback = function(err, stats, end: boolean = true) {
         if (err) {
@@ -71,7 +82,7 @@ export default function build(
         }
 
         if (end && cb) {
-            cb(this, generalConfig, allEntries, entries);
+            cb(this, generalConfig, allEntries, prebuildEntries);
         }
     };
 

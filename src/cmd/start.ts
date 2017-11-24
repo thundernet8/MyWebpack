@@ -21,51 +21,44 @@ class EntryTaskManager {
     private mpkConfig;
     private compiler: Compiler;
     private devMiddleware;
-    private hotMiddleware;
     private allEntries: IEntry[] = [];
     private allEntryNames: string[] = [];
+    private prebuildEntryNames: string[] = [];
     private builtEntryNames: string[] = [];
     private entryTaskQueue: string[] = [];
     private emitter: EventEmitter = new EventEmitter();
-
-    private htmlPageQueue: string[] = [];
+    private entryStatus: { [entryName: string]: EntryTaskStatus } = {};
 
     public constructor(
         mpkConfig,
         compiler: Compiler,
         devMiddleware,
-        hotMiddleware,
         allEntries: IEntry[],
-        builtEntryNames: string[]
+        prebuildEntryNames: string[]
     ) {
         this.mpkConfig = mpkConfig;
         this.compiler = compiler;
         this.devMiddleware = devMiddleware;
-        this.hotMiddleware = hotMiddleware;
         this.allEntries = allEntries;
         this.allEntryNames = allEntries.map(e => e.name);
-        this.builtEntryNames = builtEntryNames;
+        this.prebuildEntryNames = prebuildEntryNames;
+        this.builtEntryNames = [];
+
         this.hookupCompiler();
     }
 
     public execEntryTask(entryName: string): Promise<void> {
         if (
             !this.allEntryNames.includes(entryName) ||
-            this.builtEntryNames.includes(entryName)
+            this.entryStatus[entryName] === EntryTaskStatus.BUILDING ||
+            this.entryStatus[entryName] === EntryTaskStatus.BUILT
         ) {
             return Promise.resolve();
         }
+
+        this.entryStatus[entryName] = EntryTaskStatus.BUILDING;
         gutil.log(`🛠️ Building new entry: ${entryName}`);
         this.addEntryTask(entryName);
-
-        //
-        this.compiler.apply(
-            getHtmlWebpackPluginInstance(
-                this.mpkConfig,
-                "index.html",
-                entryName + ".html"
-            )
-        );
 
         this.devMiddleware.invalidate();
 
@@ -84,51 +77,30 @@ class EntryTaskManager {
         const { entryTaskQueue } = this;
         entryTaskQueue.push(entryName);
         this.entryTaskQueue = Array.from(new Set(entryTaskQueue));
+        this.addHtmlPage(entryName);
+    }
+
+    private addHtmlPage(entryName) {
+        if (this.builtEntryNames.includes(entryName)) {
+            return;
+        }
+        this.compiler.apply(
+            getHtmlWebpackPluginInstance(
+                this.mpkConfig,
+                "index.html",
+                entryName + ".html"
+            )
+        );
     }
 
     private hookupCompiler() {
-        const {
-            mpkConfig,
-            compiler,
-            emitter,
-            devMiddleware,
-            hotMiddleware,
-            allEntries,
-            builtEntryNames
-        } = this;
-
-        compiler.plugin("compile", function(params) {
-            console.log("The compiler is starting to compile...");
-        });
-
-        compiler.plugin("emit", function(compilation, callback) {
-            console.log("The compilation is going to emit files...");
-            callback();
-        });
-
-        compiler.plugin("after-compile", function(compilation, callback) {
-            console.log("The compiler is done compile...");
-            callback();
-        });
+        const { compiler, emitter, allEntries, builtEntryNames } = this;
 
         compiler.plugin("make", (compilation, done) => {
-            log("make");
             let promise: Promise<any>;
             const newEntryNames = this.entryTaskQueue.filter(
                 n => !builtEntryNames.includes(n)
             );
-            log("task");
-            log(this.entryTaskQueue.join("---"));
-            log(typeof hotMiddleware);
-            // force page reload when html-webpack-plugin template changes
-            // compilation.plugin("html-webpack-plugin-after-emit", function(
-            //     data,
-            //     cb
-            // ) {
-            //     log("html-webpack-plugin-after-emit");
-            //     hotMiddleware.publish({ action: "reload" });
-            //     cb();
-            // });
 
             if (newEntryNames.length > 0) {
                 promise = Promise.all(
@@ -139,14 +111,9 @@ class EntryTaskManager {
                             this["context"],
                             e.name,
                             e.path
-                        ).then(() => e);
+                        );
                     })
-                ).then((entries: IEntry[]) => {
-                    entries.forEach(e => {
-                        //this.htmlPageQueue.push(e.name + ".html");
-                    });
-                    log(JSON.stringify(Object.keys(compilation.entries)));
-                });
+                ).then(() => {});
             } else {
                 promise = Promise.resolve();
             }
@@ -156,33 +123,39 @@ class EntryTaskManager {
         });
 
         compiler.plugin("done", stats => {
-            console.log("done");
-            if (stats) {
-                const { assets, chunks } = stats.toJson();
-                console.log(Object.keys(assets));
-                console.log(Object.keys(chunks));
-            }
-            log("done");
-            log(compiler["context"]);
-            log("devMiddleware.invalidate");
             this.entryTaskQueue = [];
-            log(this.htmlPageQueue.join("---"));
-            if (this.htmlPageQueue.length > 0) {
-                this.htmlPageQueue.forEach(page => {
-                    compiler.apply(
-                        getHtmlWebpackPluginInstance(
-                            mpkConfig,
-                            "index.html",
-                            page
-                        )
-                    );
-                });
-                this.htmlPageQueue = [];
-                devMiddleware.invalidate();
-            } else {
-                emitter.emit("done");
-            }
+            emitter.emit("done");
         });
+    }
+
+    public checkPrebuildEntries() {
+        const { prebuildEntryNames, builtEntryNames } = this;
+        const entries = prebuildEntryNames.filter(
+            e => !builtEntryNames.includes(e)
+        );
+        if (entries.length > 0) {
+            gutil.log(`🛠️ Pre-Building entries: ${entries.join(" ")}`);
+            entries.forEach(e => {
+                this.entryStatus[e] = EntryTaskStatus.BUILDING;
+                this.addEntryTask(e);
+            });
+
+            this.devMiddleware.invalidate();
+
+            return new Promise((resolve, reject) => {
+                this.emitter.once("done", () => {
+                    this.builtEntryNames = []
+                        .concat(this.builtEntryNames)
+                        .concat(entries);
+                    resolve();
+                });
+                this.emitter.once("error", err => {
+                    reject(err);
+                });
+            });
+        } else {
+            return Promise.resolve({});
+        }
     }
 }
 
@@ -193,13 +166,13 @@ export default function start(config) {
         compiler,
         webpackConfig,
         allEntries: IEntry[],
-        entries: IEntry[]
+        prebuildEntries: IEntry[]
     ) {
         allEntries.forEach(e => {
             entryStatus[e.name] = EntryTaskStatus.UNBUILD;
         });
 
-        entries.forEach(e => {
+        prebuildEntries.forEach(e => {
             entryStatus[e.name] = EntryTaskStatus.BUILT;
         });
 
@@ -220,9 +193,8 @@ export default function start(config) {
             config,
             compiler,
             devMiddleware,
-            hotMiddleware,
             allEntries,
-            entries.map(e => e.name)
+            prebuildEntries.map(e => e.name)
         );
 
         server.use((req, res, next) => {
@@ -232,25 +204,7 @@ export default function start(config) {
                     1,
                     urlObj.pathname.length - 5
                 );
-                // if (
-                //     !builtEntryNames.includes(entryName) &&
-                //     allEntryNames.includes(entryName)
-                // ) {
-                //     gutil.log(`🛠️ Building new entry: ${entryName}`);
-                //     // compiler.apply(
-                //     //     getHtmlWebpackPluginInstance(
-                //     //         config,
-                //     //         "index.html",
-                //     //         entry.name + ".html"
-                //     //     )
-                //     // );
-                //     entryStatus[entryName] = EntryTaskStatus.UNBUILD;
-                //     buildingEntryNames.push(entryName);
-                //     devMiddleware.invalidate();
-                //     // TODO next on callback of emitter
-                // } else {
-                //     next();
-                // }
+
                 taskManager
                     .execEntryTask(entryName)
                     .then(next)
@@ -264,29 +218,24 @@ export default function start(config) {
 
         server.use(hotMiddleware);
 
-        server.use("/", express.static(config.mpk.distPath));
+        // server.use("/", express.static(config.mpk.distPath));
 
         server.locals.env = process.env.NODE_ENV;
         devMiddleware.waitUntilValid(() => {
-            gutil.log(
-                `Starting dev server on ${devServerOptions.host}:${
-                    devServerOptions.port
-                }\r\n`
-            );
+            taskManager
+                .checkPrebuildEntries()
+                .then(() => {
+                    gutil.log(
+                        `Starting dev server on ${devServerOptions.host}:${
+                            devServerOptions.port
+                        }\r\n`
+                    );
+                })
+                .catch(e => {
+                    throw e;
+                });
         });
-
-        console.log("xxxxxx");
-        console.log("xxxxxx");
-        console.log("xxxxxx");
 
         server.listen(devServerOptions.port, "0.0.0.0");
-
-        process.on("SIGTERM", () => {
-            gutil.log("Stopping dev server");
-            devMiddleware.close();
-            server.close(() => {
-                process.exit(0);
-            });
-        });
     });
 }

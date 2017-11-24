@@ -18,7 +18,7 @@
         "test":
             "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
         "test:dev":
-            "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=development ./bin/mpk start -c tests/mpk.config.js",
+            "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=_test ./bin/mpk start -c tests/mpk.config.js",
         "test2": "rimraf dist && rimraf lib && webpack && webpack-dev-server"
     },
     "lint-staged": {
