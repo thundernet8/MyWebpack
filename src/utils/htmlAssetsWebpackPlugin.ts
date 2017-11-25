@@ -16,7 +16,9 @@ export default class HtmlAssetsWebpackPlugin {
                         htmlPluginData.outputName.length - 5
                     );
                     if (chunks[entryName]) {
-                        htmlPluginData.assets.js = [chunks[entryName].entry];
+                        const { css, entry } = chunks[entryName];
+                        htmlPluginData.assets.js = [entry];
+                        htmlPluginData.assets.css = css;
                     }
                     callback(null, htmlPluginData);
                 }

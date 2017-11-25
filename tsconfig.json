@@ -13,7 +13,8 @@
         "baseUrl": "./src",
         "strictNullChecks": false,
         "noUnusedLocals": true,
-        "outDir": "./lib"
+        "outDir": "./lib",
+        "types": ["node"]
     },
     "include": ["./src/index.ts", "./src/test.ts"],
     "exclude": ["node_modules", "**/*.spec.ts?", "**/*.d.ts?", "lib"],
