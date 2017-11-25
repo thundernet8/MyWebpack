@@ -97,10 +97,12 @@ class EntryTaskManager {
         // if (this.builtEntryNames.includes(entryName)) {
         //     return;
         // }
+        const { publicPath, filename } = this.webpackConfig.output;
         this.compiler.apply(
             getHtmlWebpackPluginInstance(this.mpkConfig, {
                 template: "index.html",
-                name: entryName
+                name: entryName,
+                src: publicPath + filename.replace("[name]", entryName)
             })
         );
     }
@@ -115,28 +117,28 @@ class EntryTaskManager {
 
     private hookupCompiler() {
         const {
-            webpackConfig,
+            // webpackConfig,
             compiler,
             emitter,
             allEntries,
             builtEntryNames
         } = this;
-        const { publicPath, filename } = webpackConfig.output;
+        // const { publicPath, filename } = webpackConfig.output;
 
         compiler.plugin("make", (compilation, done) => {
-            compilation.plugin(
-                "html-webpack-plugin-before-html-processing",
-                function(htmlPluginData, callback) {
-                    const entryName = htmlPluginData.outputName.substr(
-                        0,
-                        htmlPluginData.outputName.length - 5
-                    );
-                    htmlPluginData.assets.js = [
-                        publicPath + filename.replace("[name]", entryName)
-                    ];
-                    callback(null, htmlPluginData);
-                }
-            );
+            // compilation.plugin(
+            //     "html-webpack-plugin-before-html-processing",
+            //     function(htmlPluginData, callback) {
+            //         const entryName = htmlPluginData.outputName.substr(
+            //             0,
+            //             htmlPluginData.outputName.length - 5
+            //         );
+            //         htmlPluginData.assets.js = [
+            //             publicPath + filename.replace("[name]", entryName)
+            //         ];
+            //         callback(null, htmlPluginData);
+            //     }
+            // );
 
             let promise: Promise<any>;
             const newEntryNames = this.entryTaskQueue.filter(

@@ -9,7 +9,7 @@
 
 <body>
     <div id="app"></div>
-    <% htmlWebpackPlugin.options.venders.forEach(function(src) { %>
+    <% htmlWebpackPlugin.options.scripts.forEach(function(src) { %>
         <script type=text/javascript src=/<%=src %>></script>
         <% }) %>
 </body>

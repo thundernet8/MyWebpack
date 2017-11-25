@@ -13,6 +13,7 @@ const WebpackStableChunkId = require("webpackstablechunkid");
 export interface IEntryInfo {
     template: string;
     name: string;
+    src: string;
 }
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -23,8 +24,8 @@ export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
         ".mpk/venders-config.json"
     ));
 
-    const venders = Object.keys(vendersConfig).map(key =>
-        vendersConfig[key].js.substr(1)
+    const venders = Object.keys(vendersConfig).map(
+        key => vendersConfig[key].js
     );
 
     return new HtmlWebpackPlugin({
@@ -34,9 +35,9 @@ export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
             mpkConfig.mpk.template,
             entry.template
         ),
-        inject: true,
-        cache: false,
-        venders
+        inject: !isDev,
+        cache: true,
+        scripts: isDev ? venders.concat([entry.src]) : venders
     });
 }
 
