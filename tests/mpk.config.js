@@ -19,7 +19,7 @@ module.exports = {
         devHost: "localhost",
         devPort: "9000",
         preEntries: ["babel-polyfill"],
-        initEntries: ["businessA.ts"],
+        initEntries: ["businessA.ts", "businessB.ts"],
         entryRoot: "tests/proj/src/entries"
     },
     webpack: {

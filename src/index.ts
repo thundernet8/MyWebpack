@@ -3,6 +3,7 @@ import * as path from "path";
 import loadConfig from "./utils/config";
 import start from "./cmd/start";
 import build from "./cmd/build";
+import publish from "./cmd/publish";
 
 const version = require("../package.json").version;
 
@@ -46,7 +47,10 @@ yargs
         "Publish project",
         args => args,
         argv => {
-            console.log("Publish project");
+            console.log("Build && Publish project");
+            const config = loadConfig(argv.config);
+            config.root = path.resolve(process.cwd());
+            publish(config);
         }
     )
     .usage("Usage: $0 <command> [options]")

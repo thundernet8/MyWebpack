@@ -29,15 +29,13 @@ export default function build(
 
     // all entries exist in entry folder
     const allEntries = scanEntries(path.resolve(root, entryRoot));
+
+    // prebuildEntries is entries auto built before dev server run under development env, or the select entries to publish under production env
     const prebuildEntries = allEntries.filter(
         entry =>
             initEntries.includes(entry.name) ||
             initEntries.some(item => item.split(".")[0] === entry.name)
     );
-
-    // if (!entries || Object.keys(entries).length < 1) {
-    //     throw new Error("Should add at least initial entry");
-    // }
 
     let webpackEntry;
 

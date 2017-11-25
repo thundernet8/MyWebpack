@@ -14,7 +14,7 @@
         "build": "tsc",
         "lint": "tslint -e node_modules typings -c .tslintrc.json src/**/*.ts",
         "prepublish": "npm run build",
-        "test": "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
+        "test": "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=production ./bin/mpk publish -c tests/mpk.config.js",
         "test:dev": "rimraf dist && rimraf lib && yarn build && cross-env NODE_ENV=_test ./bin/mpk start -c tests/mpk.config.js",
         "test2": "rimraf dist && rimraf lib && webpack && webpack-dev-server"
     },
@@ -29,6 +29,9 @@
         "babel-core": "^6.26.0",
         "babel-loader": "^7.1.2",
         "babel-polyfill": "^6.26.0",
+        "babel-preset-es2015": "^6.24.1",
+        "babel-preset-react": "^6.24.1",
+        "babel-preset-stage-2": "^6.24.1",
         "colors": "^1.1.2",
         "copy-webpack-plugin": "^4.2.1",
         "cross-env": "^5.1.1",

@@ -1,5 +1,6 @@
 import * as path from "path";
 import baseConf from "./base";
+import HtmlAssetsWebpackPlugin from "../utils/htmlAssetsWebpackPlugin";
 
 export default function getProdConfig(mpkConfig) {
     let prodConfig: any = baseConf(mpkConfig);
@@ -31,6 +32,8 @@ export default function getProdConfig(mpkConfig) {
         filename: "js/[name].[chunkhash:8].js",
         chunkFilename: "js/[name].[chunkhash:8].chunk.js"
     };
+
+    prodConfig.plugins.push(new HtmlAssetsWebpackPlugin());
 
     Object.keys(mpkConfig.webpack).forEach(key => {
         if (

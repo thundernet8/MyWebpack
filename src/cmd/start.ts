@@ -221,22 +221,12 @@ class EntryTaskManager {
 }
 
 export default function start(config) {
-    const entryStatus: { [entryName: string]: EntryTaskStatus } = {};
-
     build(config, function(
         compiler,
         webpackConfig,
         allEntries: IEntry[],
         prebuildEntries: IEntry[]
     ) {
-        allEntries.forEach(e => {
-            entryStatus[e.name] = EntryTaskStatus.UNBUILD;
-        });
-
-        prebuildEntries.forEach(e => {
-            entryStatus[e.name] = EntryTaskStatus.BUILT;
-        });
-
         const devServerOptions = webpackConfig.devServer;
 
         const server = express();

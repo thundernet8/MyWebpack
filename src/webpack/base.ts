@@ -13,7 +13,7 @@ const WebpackStableChunkId = require("webpackstablechunkid");
 export interface IEntryInfo {
     template: string;
     name: string;
-    src: string;
+    src?: string;
 }
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -70,15 +70,18 @@ export default function(
             // }),
         ];
 
-        // outputs.forEach(output => {
-        //     plugins.push(
-        //         getHtmlWebpackPluginInstance(mpkConfig, {
-        //             template: output.template,
-        //             name: output.filename,
-        //             publicPath: ""
-        //         })
-        //     );
-        // });
+        const { initEntries } = mpkConfig.mpk;
+        if (!isDev && Array.isArray(initEntries) && initEntries.length > 0) {
+            initEntries.forEach(e => {
+                const entryName = e.split(".")[0];
+                plugins.push(
+                    getHtmlWebpackPluginInstance(mpkConfig, {
+                        template: "index.html",
+                        name: entryName
+                    })
+                );
+            });
+        }
 
         if (isDev) {
             plugins = plugins.concat([
@@ -189,12 +192,14 @@ export default function(
             rules = rules.concat([
                 {
                     test: /\.jsx?$/,
-                    loader: "babel-loader",
+                    loader:
+                        "babel-loader?presets[]=es2015&presets[]=react&presets[]=stage-2",
                     exclude: /node_modules/
                 },
                 {
                     test: /\.tsx?$/,
-                    loader: "babel-loader!ts-loader",
+                    loader:
+                        "babel-loader?presets[]=es2015&presets[]=react&presets[]=stage-2!ts-loader",
                     exclude: /node_modules/
                 },
                 {
