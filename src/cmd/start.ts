@@ -1,5 +1,4 @@
 import build from "./build";
-// import * as WebpackDevServer from "webpack-dev-server";
 import * as gutil from "gutil";
 import * as express from "express";
 import * as webpackDevMiddleware from "webpack-dev-middleware";
@@ -30,7 +29,7 @@ class EntryTaskManager {
     private entryTaskQueue: string[] = [];
     private emitter: EventEmitter = new EventEmitter();
     private entryStatus: { [entryName: string]: EntryTaskStatus } = {};
-    private preEntriesBuilt: boolean = false;
+    private prePackagesBuilt: boolean = false;
 
     public constructor(
         mpkConfig,
@@ -149,11 +148,22 @@ class EntryTaskManager {
                 promise = Promise.all(
                     newEntryNames.map(n => {
                         const e = allEntries.find(item => item.name === n);
+                        const { mpk } = this.mpkConfig;
+                        const { devHost, devPort, prePackages } = mpk;
+                        const hmrEntry = [
+                            `webpack-hot-middleware/client?path=${
+                                devHost.startsWith("http")
+                                    ? devHost
+                                    : "http://" + devHost
+                            }:${devPort}/__webpack_hmr&overlay=false`,
+                            ...prePackages
+                        ];
+                        hmrEntry.push(e.path);
                         return addWebpackEntry(
                             compilation,
                             this["context"],
                             e.name,
-                            e.path
+                            hmrEntry
                         );
                     })
                 ).then(() => {});
@@ -168,7 +178,7 @@ class EntryTaskManager {
         compiler.plugin("done", stats => {
             this.entryTaskQueue = [];
             emitter.emit("done");
-            this.preEntriesBuilt &&
+            this.prePackagesBuilt &&
                 gutil.log("\r\n🎉   " + colors.green(`Building successfully.`));
         });
     }
@@ -199,7 +209,7 @@ class EntryTaskManager {
                     this.builtEntryNames = []
                         .concat(this.builtEntryNames)
                         .concat(entries);
-                    this.preEntriesBuilt = true;
+                    this.prePackagesBuilt = true;
                     entries.forEach(e => {
                         this.toggleEntryStatus(e, EntryTaskStatus.BUILT);
                         this.addEntryTask(e);

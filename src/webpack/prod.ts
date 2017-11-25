@@ -4,22 +4,22 @@ import HtmlAssetsWebpackPlugin from "../utils/htmlAssetsWebpackPlugin";
 
 export default function getProdConfig(mpkConfig) {
     let prodConfig: any = baseConf(mpkConfig);
-    const { preEntries } = mpkConfig.mpk;
+    const { prePackages } = mpkConfig.mpk;
     const { entry } = mpkConfig.webpack;
 
     if (Array.isArray(entry)) {
-        prodConfig.entry = Array.from(new Set(preEntries.concat(entry)));
+        prodConfig.entry = Array.from(new Set(prePackages.concat(entry)));
     } else {
         prodConfig.entry = {};
         Object.keys(entry).forEach(key => {
             const chunkEntry = entry[key];
             if (Array.isArray(chunkEntry)) {
                 prodConfig.entry[key] = Array.from(
-                    new Set(preEntries.concat(chunkEntry))
+                    new Set(prePackages.concat(chunkEntry))
                 );
             } else {
                 prodConfig.entry[key] = Array.from(
-                    new Set(preEntries.concat(chunkEntry))
+                    new Set(prePackages.concat(chunkEntry))
                 );
             }
         });

@@ -3,28 +3,28 @@ import baseConf from "./base";
 
 export default function getDevConfig(mpkConfig) {
     let devConfig: any = baseConf(mpkConfig);
-    const { devHost, devPort, preEntries } = mpkConfig.mpk;
+    const { devHost, devPort, prePackages } = mpkConfig.mpk;
     const { entry } = mpkConfig.webpack;
-    const wdsEntries = [
+    const hmrEntry = [
         `webpack-hot-middleware/client?path=${
             devHost.startsWith("http") ? devHost : "http://" + devHost
         }:${devPort}/__webpack_hmr&overlay=false`,
-        ...preEntries
+        ...prePackages
     ];
 
     if (Array.isArray(entry)) {
-        devConfig.entry = Array.from(new Set(wdsEntries.concat(entry)));
+        devConfig.entry = Array.from(new Set(hmrEntry.concat(entry)));
     } else {
         devConfig.entry = {};
         Object.keys(entry).forEach(key => {
             const chunkEntry = entry[key];
             if (Array.isArray(chunkEntry)) {
                 devConfig.entry[key] = Array.from(
-                    new Set(wdsEntries.concat(chunkEntry))
+                    new Set(hmrEntry.concat(chunkEntry))
                 );
             } else {
                 devConfig.entry[key] = Array.from(
-                    new Set(wdsEntries.concat(chunkEntry))
+                    new Set(hmrEntry.concat(chunkEntry))
                 );
             }
         });
