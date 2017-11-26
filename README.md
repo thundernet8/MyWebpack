@@ -1,2 +1,2 @@
-# MyWebpack
-My webpack integrated CLI for multi-entries and collaborative project
+## MyWebpack
+My webpack integrated CLI for multi-entries and collaborative projects

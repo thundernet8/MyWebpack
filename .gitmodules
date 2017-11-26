@@ -1,0 +1,3 @@
+[submodule "tests/proj"]
+	path = tests/proj
+	url = git@github.com:WuXueqian/WebpackProjectSample.git

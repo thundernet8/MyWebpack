@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "allowJs": true,
+        "target": "es2015",
+        "lib": ["es2016", "dom"],
+        "module": "commonjs",
+        "noImplicitAny": false,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "baseUrl": "./src",
+        "strictNullChecks": false,
+        "noUnusedLocals": true,
+        "outDir": "./lib",
+        "types": ["node"]
+    },
+    "include": ["./src/index.ts", "./src/test.ts"],
+    "exclude": ["node_modules", "**/*.spec.ts?", "**/*.d.ts?", "lib"],
+    "typeRoots": ["node_modules/@types"]
+}
