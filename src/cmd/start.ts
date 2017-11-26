@@ -6,7 +6,6 @@ import * as webpackHotMiddleware from "webpack-hot-middleware";
 import { IEntry, addWebpackEntry } from "../utils/entry";
 import * as url from "url";
 import { getHtmlWebpackPluginInstance } from "../webpack/base";
-import log from "../utils/log";
 import { EventEmitter } from "events";
 import { Compiler } from "webpack";
 import * as colors from "colors";
@@ -109,8 +108,6 @@ class EntryTaskManager {
     private toggleEntryStatus(entryName: string, status: EntryTaskStatus) {
         const { entryStatus } = this;
         entryStatus[entryName] = status;
-        log("-------------------");
-        log(JSON.stringify(entryStatus));
         this.entryStatus = Object.assign({}, entryStatus);
     }
 
@@ -231,12 +228,9 @@ class EntryTaskManager {
 }
 
 export default function start(config) {
-    build(config, function(
-        compiler,
-        webpackConfig,
-        allEntries: IEntry[],
-        prebuildEntries: IEntry[]
-    ) {
+    return build(config).then(result => {
+        const { compiler, webpackConfig, allEntries } = result;
+        const prebuildEntries = result.entries;
         const devServerOptions = webpackConfig.devServer;
 
         const server = express();
@@ -273,7 +267,7 @@ export default function start(config) {
                     //     hotMiddleware.publish({ action: "reload" });
                     // })
                     .then(next)
-                    .catch(err => log(err.toString()));
+                    .catch(err => gutil.log(err.toString()));
             } else {
                 next();
             }

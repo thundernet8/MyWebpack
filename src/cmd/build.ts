@@ -8,7 +8,14 @@ import { IEntry, scanEntries } from "../utils/entry";
 import * as path from "path";
 import { getEmptyEntry } from "../utils/path";
 
-export default function build(
+export interface IBuildResult {
+    compiler: Compiler;
+    webpackConfig;
+    allEntries: IEntry[];
+    entries: IEntry[];
+}
+
+function _build(
     config,
     cb?: (
         compiler: Compiler,
@@ -64,7 +71,7 @@ export default function build(
                         chunks: false, // Makes the build much quieter
                         chunkModules: false,
                         modules: false,
-                        children: true,
+                        children: false,
                         errorDetails: true,
                         colors: true
                     }) +
@@ -87,6 +94,23 @@ export default function build(
                     : getProdConfig(config);
             const compiler = webpack(generalConfig);
             compiler.run(callback.bind(compiler));
+        }
+    });
+}
+
+export default function build(config): Promise<IBuildResult> {
+    return new Promise((resolve, reject) => {
+        try {
+            _build(config, (compiler, webpackConfig, allEntries, entries) => {
+                resolve({
+                    compiler,
+                    webpackConfig,
+                    allEntries,
+                    entries
+                });
+            });
+        } catch (err) {
+            reject(err);
         }
     });
 }

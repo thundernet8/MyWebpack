@@ -16,10 +16,14 @@ module.exports = {
             dev: "/",
             prod: "https://assets.example.com/"
         },
+        publishPath: {
+            dev: "../testRepo",
+            prod: "../publishRepo"
+        },
         devHost: "localhost",
         devPort: "9000",
         prePackages: ["babel-polyfill"],
-        initEntries: ["businessA.ts"],
+        initEntries: ["businessA.ts", "businessB.ts"],
         entryRoot: "tests/proj/src/entries"
     },
     webpack: {
@@ -61,10 +65,10 @@ module.exports = {
         target: "web",
         externals: {
             jquery: "jQuery"
-        },
-        module: {
-            rules: []
-        },
-        plugins: []
+        }
+        // module: {
+        //     rules: []
+        // },
+        // plugins: []
     }
 };
