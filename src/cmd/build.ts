@@ -1,12 +1,16 @@
+import * as path from "path";
 import * as webpack from "webpack";
-import * as gutil from "gutil";
+import { Compiler } from "webpack";
+import * as inquirer from "inquirer";
+import * as SearchCheckbox from "inquirer-search-checkbox";
 import getDllConfig from "../webpack/dll";
 import getDevConfig from "../webpack/dev";
 import getProdConfig from "../webpack/prod";
-import { Compiler } from "webpack";
 import { IEntry, scanEntries } from "../utils/entry";
-import * as path from "path";
 import { getEmptyEntry } from "../utils/path";
+import log from "../utils/log";
+
+inquirer.registerPrompt("SearchCheckbox", SearchCheckbox);
 
 export interface IBuildResult {
     compiler: Compiler;
@@ -29,10 +33,6 @@ function _build(
 
     const { root, mpk } = config;
     const { entryRoot, initEntries } = mpk;
-
-    if (!entryRoot) {
-        throw new Error("Entries folder is not defined in config");
-    }
 
     // all entries exist in entry folder
     const allEntries = scanEntries(path.resolve(root, entryRoot));
@@ -66,7 +66,7 @@ function _build(
         if (err) {
             throw new Error(err);
         } else {
-            gutil.log(
+            console.log(
                 "\r\n" +
                     stats.toString({
                         version: false,
@@ -102,17 +102,62 @@ function _build(
     });
 }
 
-export default function build(config): Promise<IBuildResult> {
-    return new Promise((resolve, reject) => {
+export default async function build(config) {
+    const { root, mpk } = config;
+    const { entryRoot } = mpk;
+
+    if (!entryRoot) {
+        throw new Error("Entries folder is not defined in config");
+    }
+
+    if (process.env.NODE_ENV === "production") {
+        // all entries exist in entry folder
+        const allEntries = scanEntries(path.resolve(root, entryRoot));
+        const allEntryKeys = allEntries.map(e => e.name);
+        const entryKeys = ["All"].concat(allEntryKeys);
+        const answers = await inquirer.prompt([
+            {
+                type: "SearchCheckbox",
+                name: "key",
+                message: `Select entries to build (${entryKeys.length})`,
+                choices: entryKeys.map(name => ({ name })),
+                pageSize: 5,
+                validate: function(answer) {
+                    if (answer.length < 1) {
+                        return "You must choose at least one entry.";
+                    }
+                    return true;
+                }
+            }
+        ]);
+
+        if (!answers.key || answers.key.length < 1) {
+            log.warning("No entry select");
+        }
+
+        config.mpk.initEntries = answers.key.includes("All")
+            ? allEntryKeys
+            : answers.key;
+    }
+
+    return new Promise<IBuildResult>((resolve, reject) => {
         try {
-            _build(config, (compiler, webpackConfig, allEntries, entries) => {
-                resolve({
-                    compiler,
-                    webpackConfig,
-                    allEntries,
-                    entries
-                });
-            });
+            _build(
+                config,
+                (
+                    compiler: Compiler,
+                    webpackConfig: any,
+                    allEntries: IEntry[],
+                    entries: IEntry[]
+                ) => {
+                    resolve({
+                        compiler,
+                        webpackConfig,
+                        allEntries,
+                        entries
+                    });
+                }
+            );
         } catch (err) {
             reject(err);
         }

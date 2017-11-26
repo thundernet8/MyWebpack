@@ -1,14 +1,11 @@
-import build from "./build";
-import * as gutil from "gutil";
-// import { IEntry } from "../utils/entry";
-// import { Compiler } from "webpack";
-import * as colors from "colors";
-import GitHelper from "../utils/git";
-import * as inquirer from "inquirer";
-import * as path from "path";
-import { isDirectory } from "../utils/path";
 import * as vfs from "vinyl-fs";
 import * as fse from "fs-extra";
+import * as path from "path";
+import * as inquirer from "inquirer";
+import build from "./build";
+import log from "../utils/log";
+import GitHelper from "../utils/git";
+import { isDirectory } from "../utils/path";
 
 export default async function publish(config) {
     const { publishPath, distPath } = config.mpk;
@@ -43,7 +40,7 @@ export default async function publish(config) {
     publishRepoPath = path.resolve(config.root, publishRepoPath);
 
     if (!await isDirectory(publishRepoPath)) {
-        gutil.log(colors.red(`Failure: ${publishRepoPath} does not exist`));
+        log.error(`Failure: ${publishRepoPath} does not exist`);
         return;
     }
 
@@ -52,27 +49,25 @@ export default async function publish(config) {
     try {
         const stats = await publishRepo.checkStatus();
         if (stats.files.length > 0) {
-            gutil.log(colors.red(`Failure: ${publishRepoPath} is not clean`));
+            log.error(`Failure: ${publishRepoPath} is not clean`);
             return;
         }
     } catch (e) {
-        gutil.log(
-            colors.red(`Failure: ${publishRepoPath} is not a git repository`)
-        );
+        log.error(`Failure: ${publishRepoPath} is not a git repository`);
         return;
     }
 
     try {
         await publishRepo.pull("master");
     } catch (err) {
-        gutil.log(colors.red(`Failure: ${err.message || err.toString()}`));
+        log.error(`Failure: ${err.message || err.toString()}`);
         return;
     }
 
     await fse.emptyDir(distFullPath);
     await build(config);
 
-    gutil.log("\r\n🎉   " + colors.green(`Build successfully.`));
+    log.success("\r\n🎉   Build successfully.");
 
     vfs.src(path.join(distFullPath, "**/*")).pipe(vfs.dest(publishRepoPath));
 
@@ -95,15 +90,13 @@ export default async function publish(config) {
                 "--rebase": "true"
             });
             await publishRepo.push("master");
-            gutil.log(
-                colors.green(
-                    `\r\n🎉   Publish ${
-                        isProd ? "production" : "test"
-                    } build successfully`
-                )
+            log.success(
+                `\r\n🎉   Publish ${
+                    isProd ? "production" : "test"
+                } build successfully`
             );
         } catch (err) {
-            gutil.log(colors.red(`\r\n Publish assets failed`));
+            log.error(`\r\n Publish assets failed`);
         }
     }
 }

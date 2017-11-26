@@ -1,8 +1,7 @@
 {
     "name": "mywebpack",
     "version": "0.0.1",
-    "description":
-        "My webpack integrated CLI for multi-entries and collaborative projects",
+    "description": "My webpack integrated CLI for multi-entries and collaborative projects",
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",
     "repository": "git@github.com:thundernet8/MyWebpack.git",
@@ -15,16 +14,15 @@
         "build": "rimraf lib && tsc && cp src/index.d.ts lib/",
         "lint": "tslint -e node_modules typings -c .tslintrc.json src/**/*.ts",
         "prepublish": "npm run build",
-        "test:build":
-            "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
-        "test:publish":
-            "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=production ./bin/mpk publish -c tests/mpk.config.js",
-        "test:dev":
-            "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=_test ./bin/mpk start -c tests/mpk.config.js",
-        "test2": "rimraf dist && rimraf lib && webpack && webpack-dev-server"
+        "test:build": "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
+        "test:publish": "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=production ./bin/mpk publish -c tests/mpk.config.js",
+        "test:start": "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=_test ./bin/mpk start -c tests/mpk.config.js",
+        "test": "node lib/test.js"
     },
     "lint-staged": {
-        "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+        "src/**/*.{ts,tsx}": [
+            "lint-staged:ts"
+        ]
     },
     "pre-commit": "lint-staged",
     "dependencies": {
@@ -36,20 +34,17 @@
         "babel-preset-react": "^6.24.1",
         "babel-preset-stage-2": "^6.24.1",
         "colors": "^1.1.2",
-        "copy-webpack-plugin": "^4.2.1",
         "cross-env": "^5.1.1",
         "css-loader": "^0.28.7",
-        "customized-progress-webpack-plugin": "^0.0.3",
         "express": "^4.16.2",
         "extract-text-webpack-plugin": "^3.0.2",
         "fs-extra": "^4.0.2",
-        "gutil": "^1.6.4",
         "html-webpack-plugin": "^2.30.1",
         "inquirer": "^4.0.0",
+        "inquirer-search-checkbox": "^0.1.1",
         "less": "^2.7.3",
         "less-loader": "^4.0.5",
         "optimize-css-assets-webpack-plugin": "^3.2.0",
-        "postcss-loader": "^2.0.9",
         "prettier": "^1.8.2",
         "react-hot-loader": "^3.1.3",
         "simple-git": "^1.82.0",

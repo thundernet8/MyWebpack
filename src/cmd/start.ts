@@ -1,14 +1,13 @@
-import build from "./build";
-import * as gutil from "gutil";
 import * as express from "express";
+import { EventEmitter } from "events";
+import { Compiler } from "webpack";
+import * as url from "url";
 import * as webpackDevMiddleware from "webpack-dev-middleware";
 import * as webpackHotMiddleware from "webpack-hot-middleware";
 import { IEntry, addWebpackEntry } from "../utils/entry";
-import * as url from "url";
 import { getHtmlWebpackPluginInstance } from "../webpack/base";
-import { EventEmitter } from "events";
-import { Compiler } from "webpack";
-import * as colors from "colors";
+import log from "../utils/log";
+import build from "./build";
 
 enum EntryTaskStatus {
     BUILT,
@@ -60,10 +59,9 @@ class EntryTaskManager {
         }
 
         if (!this.builtEntryNames.includes(entryName)) {
-            gutil.log(
-                "\r\n🛠️  " +
-                    colors.yellow(`Building new entry: ${entryName}`) +
-                    "\r\n"
+            log.warning(
+                `\r\n🛠️  Building new entry: ${entryName}
+                    \r\n`
             );
             this.addHtmlPage(entryName);
         }
@@ -72,7 +70,7 @@ class EntryTaskManager {
         this.entryStatus[entryName] = EntryTaskStatus.BUILDING;
         this.devMiddleware.invalidate();
 
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             this.emitter.once("done", () => {
                 this.builtEntryNames.push(entryName);
                 this.toggleEntryStatus(entryName, EntryTaskStatus.BUILT);
@@ -122,20 +120,6 @@ class EntryTaskManager {
         // const { publicPath, filename } = webpackConfig.output;
 
         compiler.plugin("make", (compilation, done) => {
-            // compilation.plugin(
-            //     "html-webpack-plugin-before-html-processing",
-            //     function(htmlPluginData, callback) {
-            //         const entryName = htmlPluginData.outputName.substr(
-            //             0,
-            //             htmlPluginData.outputName.length - 5
-            //         );
-            //         htmlPluginData.assets.js = [
-            //             publicPath + filename.replace("[name]", entryName)
-            //         ];
-            //         callback(null, htmlPluginData);
-            //     }
-            // );
-
             let promise: Promise<any>;
             const newEntryNames = this.entryTaskQueue.filter(
                 n => !builtEntryNames.includes(n)
@@ -176,7 +160,7 @@ class EntryTaskManager {
             this.entryTaskQueue = [];
             emitter.emit("done");
             this.prePackagesBuilt &&
-                gutil.log("\r\n🎉   " + colors.green(`Building successfully.`));
+                log.success("\r\n🎉   Building successfully.");
         });
     }
 
@@ -186,12 +170,8 @@ class EntryTaskManager {
             e => !builtEntryNames.includes(e)
         );
         if (entries.length > 0) {
-            gutil.log(
-                "\r\n🛠️  " +
-                    colors.yellow(
-                        `Pre-Building entries: ${entries.join(" ")}`
-                    ) +
-                    "\r\n"
+            log.warning(
+                `\r\n🛠️  Pre-Building entries: ${entries.join(" ")}\r\n`
             );
             entries.forEach(e => {
                 this.toggleEntryStatus(e, EntryTaskStatus.BUILDING);
@@ -201,7 +181,7 @@ class EntryTaskManager {
 
             this.devMiddleware.invalidate();
 
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 this.emitter.once("done", () => {
                     this.builtEntryNames = []
                         .concat(this.builtEntryNames)
@@ -222,7 +202,7 @@ class EntryTaskManager {
                 });
             });
         } else {
-            return Promise.resolve({});
+            return Promise.resolve();
         }
     }
 }
@@ -267,7 +247,7 @@ export default function start(config) {
                     //     hotMiddleware.publish({ action: "reload" });
                     // })
                     .then(next)
-                    .catch(err => gutil.log(err.toString()));
+                    .catch(err => log.error(err.message || err.toString()));
             } else {
                 next();
             }
@@ -284,14 +264,11 @@ export default function start(config) {
             taskManager
                 .checkPrebuildEntries()
                 .then(() => {
-                    gutil.log(
-                        "\r\n📡  " +
-                            colors.green(
-                                `Starting dev server on ${
-                                    devServerOptions.host
-                                }:${devServerOptions.port}`
-                            ) +
-                            "\r\n"
+                    log.success(
+                        `\r\n📡  Starting dev server on ${
+                            devServerOptions.host
+                        }:${devServerOptions.port}
+                            \r\n`
                     );
                 })
                 .catch(e => {

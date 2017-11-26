@@ -1,8 +1,25 @@
-import * as path from "path";
-import loadConfig from "./config";
-// import start from "./cmd/publish";
-import build from "./cmd/build";
+import * as inquirer from "inquirer";
+import * as SearchCheckbox from "inquirer-search-checkbox";
 
-const config = loadConfig("tests/mpk.config.js");
-config.root = path.resolve(process.cwd());
-build(config);
+inquirer.registerPrompt("SearchCheckbox", SearchCheckbox);
+
+const entryKeys = ["A", "B"];
+inquirer
+    .prompt([
+        {
+            type: "SearchCheckbox",
+            name: "key",
+            message: `Select entries to build (${entryKeys.length})`,
+            choices: entryKeys.map(name => ({ name })),
+            pageSize: 5,
+            validate: function(answer) {
+                if (answer.length < 1) {
+                    return "You must choose at least one entry.";
+                }
+                return true;
+            }
+        }
+    ])
+    .then(x => {
+        console.log(x);
+    });

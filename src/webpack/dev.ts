@@ -63,7 +63,7 @@ export default function getDevConfig(mpkConfig) {
             "X-Pack-With": "MPK"
         }
         // openPage: "index.html",
-        // publicPath: "http://localhost:9001/"
+        // publicPath: "http://localhost:9000/"
     };
 
     return devConfig;

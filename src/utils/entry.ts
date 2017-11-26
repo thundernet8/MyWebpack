@@ -26,13 +26,8 @@ export function scanEntries(folder: string): IEntry[] {
     });
 }
 
-export function addWebpackEntry(
-    compilation,
-    context,
-    entryName,
-    entryPath
-): Promise<void> {
-    return new Promise((resolve, reject) => {
+export function addWebpackEntry(compilation, context, entryName, entryPath) {
+    return new Promise<void>((resolve, reject) => {
         const dep = DynamicEntryPlugin.createDependency(entryPath, entryName);
         compilation.addEntry(context, dep, entryName, err => {
             if (err) {

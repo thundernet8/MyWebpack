@@ -1,11 +1,8 @@
 import * as path from "path";
 import * as webpack from "webpack";
-// import CopyWebpackPlugin from "copy-webpack-plugin";
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-// const SimpleProgressWebpackPlugin = require("customized-progress-webpack-plugin");
-
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
     .BundleAnalyzerPlugin;
 const WebpackStableChunkId = require("webpackstablechunkid");
