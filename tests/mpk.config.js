@@ -1,14 +1,12 @@
 const path = require("path");
 
-const isDev = process.env.NODE_ENV !== "production";
-
 module.exports = {
     name: "test",
     root: "",
     mpk: {
         venders: ["react"], // array or key-array value pair
         // in production, all styles will be extract to one css file
-        styleName: "style2",
+        styleName: "style",
         distPath: "dist",
         template: "tests/proj/src/templates", // relative to project root
         htmlInjects: { key1: "value" }, // key-value pairs

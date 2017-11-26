@@ -111,33 +111,38 @@ export default async function build(config) {
     }
 
     if (process.env.NODE_ENV === "production") {
-        // all entries exist in entry folder
-        const allEntries = scanEntries(path.resolve(root, entryRoot));
-        const allEntryKeys = allEntries.map(e => e.name);
-        const entryKeys = ["All"].concat(allEntryKeys);
-        const answers = await inquirer.prompt([
-            {
-                type: "SearchCheckbox",
-                name: "key",
-                message: `Select entries to build (${entryKeys.length})`,
-                choices: entryKeys.map(name => ({ name })),
-                pageSize: 5,
-                validate: function(answer) {
-                    if (answer.length < 1) {
-                        return "You must choose at least one entry.";
+        try {
+            // all entries exist in entry folder
+            const allEntries = scanEntries(path.resolve(root, entryRoot));
+            const allEntryKeys = allEntries.map(e => e.name);
+            const entryKeys = ["All"].concat(allEntryKeys);
+            const answers = await inquirer.prompt([
+                {
+                    type: "SearchCheckbox",
+                    name: "key",
+                    message: `Select entries to build (${entryKeys.length})`,
+                    choices: entryKeys.map(name => ({ name })),
+                    pageSize: 5,
+                    validate: function(answer) {
+                        if (answer.length < 1) {
+                            return "You must choose at least one entry.";
+                        }
+                        return true;
                     }
-                    return true;
                 }
+            ]);
+
+            if (!answers.key || answers.key.length < 1) {
+                log.warning("No entry select");
             }
-        ]);
 
-        if (!answers.key || answers.key.length < 1) {
-            log.warning("No entry select");
+            config.mpk.initEntries = answers.key.includes("All")
+                ? allEntryKeys
+                : answers.key;
+        } catch (err) {
+            log.error(err.message || err.toString());
+            return;
         }
-
-        config.mpk.initEntries = answers.key.includes("All")
-            ? allEntryKeys
-            : answers.key;
     }
 
     return new Promise<IBuildResult>((resolve, reject) => {
