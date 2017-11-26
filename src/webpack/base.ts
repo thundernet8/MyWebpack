@@ -28,17 +28,25 @@ export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
         key => vendersConfig[key].js
     );
 
-    return new HtmlWebpackPlugin({
-        filename: path.resolve(mpkConfig.mpk.distPath, entry.name + ".html"),
-        template: path.resolve(
-            mpkConfig.root,
-            mpkConfig.mpk.template,
-            entry.template
-        ),
-        inject: !isDev,
-        cache: true,
-        scripts: isDev ? venders.concat([entry.src]) : venders
-    });
+    const { htmlInjects } = mpkConfig.mpk;
+
+    return new HtmlWebpackPlugin(
+        Object.assign({}, htmlInjects, {
+            title: entry.name,
+            filename: path.resolve(
+                mpkConfig.mpk.distPath,
+                entry.name + ".html"
+            ),
+            template: path.resolve(
+                mpkConfig.root,
+                mpkConfig.mpk.template,
+                entry.template
+            ),
+            inject: !isDev,
+            cache: true,
+            scripts: isDev ? venders.concat([entry.src]) : venders
+        })
+    );
 }
 
 export default function(

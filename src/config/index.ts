@@ -1,7 +1,8 @@
 import * as path from "path";
 import * as fs from "fs";
+import { IMPKConfig } from "../index.d";
 
-export default function loadConfig(configFile: string) {
+export default function loadConfig(configFile: string): IMPKConfig {
     const filePath = path.resolve(configFile);
     if (!fs.existsSync(filePath)) {
         throw new Error(
@@ -14,7 +15,6 @@ export default function loadConfig(configFile: string) {
 }
 
 function defaults(config) {
-    // TODO
     const defaultMpk = {
         styleName: "style",
         distPath: "dist",
@@ -22,16 +22,37 @@ function defaults(config) {
         htmlInjects: {},
         publicPath: {
             dev: "/",
-            prod: "https://assets.example.com/"
+            prod: "/"
         },
         devHost: "localhost",
         devPort: 9000,
         // 前置包Entries
         prePackages: ["babel-polyfill"],
         // 预编译的Entries
-        initEntries: ["index.ts"],
+        initEntries: [],
         // Entries所在文件夹(绝对路径或相对项目根目录)
         entryRoot: "src/entries"
     };
-    return Object.assign({}, { mpk: defaultMpk }, config);
+
+    const defaultWebpack = {
+        resolve: {
+            extensions: [
+                ".json",
+                ".js",
+                ".jsx",
+                ".ts",
+                ".tsx",
+                ".css",
+                ".less",
+                ".scss"
+            ],
+            modules: ["node_modules"]
+        },
+        target: "web"
+    };
+    return Object.assign(
+        {},
+        { mpk: defaultMpk, webpack: defaultWebpack },
+        config
+    );
 }

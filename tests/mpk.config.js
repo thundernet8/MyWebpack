@@ -8,10 +8,10 @@ module.exports = {
     mpk: {
         venders: ["react"], // array or key-array value pair
         // in production, all styles will be extract to one css file
-        styleName: "style",
+        styleName: "style2",
         distPath: "dist",
         template: "tests/proj/src/templates", // relative to project root
-        htmlInjects: { key: "value" }, // key-value pairs
+        htmlInjects: { key1: "value" }, // key-value pairs
         publicPath: {
             dev: "/",
             prod: "https://assets.example.com/"
@@ -27,24 +27,6 @@ module.exports = {
         entryRoot: "tests/proj/src/entries"
     },
     webpack: {
-        // entry: {
-        //     businessA: [
-        //         // "babel-polyfill",
-        //         path.resolve(__dirname, "proj/src/entries/businessA.ts")
-        //     ]
-        // },
-        // output: {
-        //     path: path.resolve(__dirname, "../dist/assets/js"),
-        //     publicPath: isDev
-        //         ? "/assets/js/"
-        //         : "https://assets.example.com/assets/js/",
-        //     filename: "[name].[chunkhash:8].js",
-        //     library: "[name]_[chunkhash:8]"
-        // },
-        node: {
-            __filename: false,
-            __dirname: false
-        },
         resolve: {
             extensions: [
                 ".json",
@@ -53,7 +35,8 @@ module.exports = {
                 ".ts",
                 ".tsx",
                 ".css",
-                ".less"
+                ".less",
+                ".scss"
             ],
             alias: {
                 IMG: path.resolve(__dirname, "../src/assets/images/"),

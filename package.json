@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "description":
         "My webpack integrated CLI for multi-entries and collaborative projects",
-    "main": "./lib/test.js",
+    "main": "./lib/index.js",
     "types": "./lib/index.d.ts",
     "repository": "git@github.com:thundernet8/MyWebpack.git",
     "author": "wuxueqian <wuxueqian2010@hotmail.com>",
@@ -12,10 +12,12 @@
         "mpk": "./bin/mpk"
     },
     "scripts": {
-        "build": "tsc",
+        "build": "rimraf lib && tsc && cp src/index.d.ts lib/",
         "lint": "tslint -e node_modules typings -c .tslintrc.json src/**/*.ts",
         "prepublish": "npm run build",
-        "test":
+        "test:build":
+            "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=production ./bin/mpk build -c tests/mpk.config.js",
+        "test:publish":
             "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=production ./bin/mpk publish -c tests/mpk.config.js",
         "test:dev":
             "rimraf dist && rimraf lib && npm run build && cross-env NODE_ENV=_test ./bin/mpk start -c tests/mpk.config.js",

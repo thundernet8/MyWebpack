@@ -57,6 +57,10 @@ function _build(
     }
 
     config.webpack.entry = webpackEntry;
+    config.webpack.node = {
+        __filename: false,
+        __dirname: false
+    };
 
     const callback = function(err, stats, end: boolean = true) {
         if (err) {

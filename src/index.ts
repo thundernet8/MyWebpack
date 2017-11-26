@@ -1,6 +1,6 @@
 import * as yargs from "yargs";
 import * as path from "path";
-import loadConfig from "./utils/config";
+import loadConfig from "./config";
 import start from "./cmd/start";
 import build from "./cmd/build";
 import publish from "./cmd/publish";
