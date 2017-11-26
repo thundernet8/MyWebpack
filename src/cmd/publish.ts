@@ -65,7 +65,10 @@ export default async function publish(config) {
     }
 
     await fse.emptyDir(distFullPath);
-    await build(config);
+    const result = await build(config);
+    if (!result) {
+        return;
+    }
 
     log.success("\r\n🎉   Build successfully.");
 
