@@ -50,10 +50,10 @@ export default function gen(config) {
 
         declare var module;
 
-        function render(App: any) {
+        function render(App: React.ReactElement<any>) {
             const target: HTMLElement = document.getElementById("app") as HTMLElement;
             ReactDOM.unmountComponentAtNode(target);
-            ReactDOM.render(App, target);
+            ReactDOM.render(<App />, target);
         }
 
         render(${route.componentName});
@@ -68,7 +68,7 @@ export default function gen(config) {
         // entries
         fs.writeFileSync(
             path.join(
-                path.join(process.cwd(), `${entryRoot}/${route.chunk}.ts`)
+                path.join(process.cwd(), `${entryRoot}/${route.chunk}.tsx`)
             ),
             prettier.format(code.join(""), prettierConfig)
         );

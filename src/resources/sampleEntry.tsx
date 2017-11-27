@@ -4,10 +4,10 @@ import A from "../views/A";
 
 declare var module;
 
-function render(App: any) {
+function render(App: React.ReactElement<any>) {
     const target: HTMLElement = document.getElementById("app") as HTMLElement;
     ReactDOM.unmountComponentAtNode(target);
-    ReactDOM.render(App, target);
+    ReactDOM.render(<App />, target);
 }
 
 render(A);

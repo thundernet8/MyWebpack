@@ -87,7 +87,7 @@ function writeSampleEntryAndView(srcFolder) {
     };
 
     const entryCode = readFileSync(
-        path.resolve(getPackagePath(), "./src/resources/sampleEntry.ts")
+        path.resolve(getPackagePath(), "./src/resources/sampleEntry.tsx")
     );
 
     const viewCode = readFileSync(
