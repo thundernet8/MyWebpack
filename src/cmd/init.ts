@@ -1,10 +1,12 @@
 import * as path from "path";
 import * as vfs from "vinyl-fs";
-import { mkdirSync, writeFileSync, readFileSync } from "fs";
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from "fs";
 import * as prettier from "prettier";
 import * as inquirer from "inquirer";
 import log from "../utils/log";
 import { getPackagePath } from "../utils/path";
+
+const pkg = require("../../package.json");
 
 function writeMpkConfig(filePath) {
     const prettierConfig = {
@@ -20,6 +22,38 @@ function writeMpkConfig(filePath) {
     );
 
     writeFileSync(filePath, prettier.format(code, prettierConfig));
+}
+
+function writePackageJson(filePath) {
+    if (existsSync(filePath)) {
+        const json = JSON.parse(readFileSync(filePath).toString());
+        const sampleJson = JSON.parse(
+            readFileSync(
+                getPackagePath(),
+                "src/resources/package.json"
+            ).toString()
+        );
+        json.scripts = Object.assign(
+            {},
+            json.scripts || {},
+            sampleJson.scripts
+        );
+        json.dependencies = json.dependencies || {};
+        json.dependencies.mywebpack = "^" + pkg.version;
+        json.devDependencies = Object.assign(
+            {},
+            json.devDependencies || {},
+            sampleJson.devDependencies
+        );
+
+        json["lint-staged"] = {
+            "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+        };
+        json["pre-commit"] = "lint-staged";
+        writeFileSync(filePath, JSON.stringify(json));
+    } else {
+        copyFile(path.join(), path.dirname(filePath));
+    }
 }
 
 function writeSampleEntryAndView(srcFolder) {
@@ -106,16 +140,13 @@ export default async function init() {
         writeSampleTemplate(path.join(currentPath, "src/templates/index.html"));
         mkdirSync(path.join(currentPath, "src/views"));
         writeMpkConfig(path.join(currentPath, "mpk.config.js"));
+        writePackageJson(path.join(currentPath, "package.json"));
         copyFile(
             path.join(getPackagePath(), "src/resources/entry.yml"),
             currentPath
         );
         copyFile(
             path.join(getPackagePath(), "src/resources/tsconfig.json"),
-            currentPath
-        );
-        copyFile(
-            path.join(getPackagePath(), "src/resources/package.json"),
             currentPath
         );
         copyFile(
