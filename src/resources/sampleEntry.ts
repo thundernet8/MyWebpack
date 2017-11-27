@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import A from "../views/viewA";
+import A from "../views/A";
 
 declare var module;
 

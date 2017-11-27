@@ -40,11 +40,11 @@ function writeSampleEntryAndView(srcFolder) {
     );
 
     writeFileSync(
-        path.join(srcFolder, "entries/entryA.ts"),
+        path.join(srcFolder, "entries/A.ts"),
         prettier.format(entryCode, prettierConfig)
     );
     writeFileSync(
-        path.join(srcFolder, "views/viewA.ts"),
+        path.join(srcFolder, "views/A.ts"),
         prettier.format(viewCode, prettierConfig)
     );
 }
@@ -107,7 +107,7 @@ export default async function init() {
         mkdirSync(path.join(currentPath, "src/views"));
         writeMpkConfig(path.join(currentPath, "mpk.config.js"));
         copyFile(
-            path.join(getPackagePath(), "src/resources/routes.yml"),
+            path.join(getPackagePath(), "src/resources/entry.yml"),
             currentPath
         );
         copyFile(

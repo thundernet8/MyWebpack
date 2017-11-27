@@ -5,7 +5,7 @@ import build from "./cmd/build";
 import publish from "./cmd/publish";
 import analyze from "./cmd/analyse";
 import init from "./cmd/init";
-import routes from "./cmd/routes";
+import gen from "./cmd/gen";
 
 const version = require("../package.json").version;
 
@@ -82,7 +82,8 @@ yargs
         args => args,
         argv => {
             console.log("Generate routes and entries from routes.yml");
-            routes();
+            const config = loadConfig(argv.config);
+            gen(config);
         }
     )
     .usage("Usage: $0 <command> [options]")

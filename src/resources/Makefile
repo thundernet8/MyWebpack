@@ -1,5 +1,5 @@
 export PATH := $(shell pwd)/node_modules/.bin:$(PATH)
-.PHONY: init aly dev build clean publish routes
+.PHONY: init aly dev build clean publish gen
 
 init:
 	yarn
@@ -19,5 +19,5 @@ publish:
 clean:
 	rm -rf dist
 
-routes:
-	yarn routes
+gen:
+	yarn gen
