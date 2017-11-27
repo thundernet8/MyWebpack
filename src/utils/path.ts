@@ -22,3 +22,16 @@ export function isDirectory(dirPathName) {
         })
         .catch(() => false);
 }
+
+export function isFile(filePath) {
+    return fse
+        .stat(filePath)
+        .then(stats => {
+            if (stats) {
+                return stats.isFile();
+            }
+
+            return false;
+        })
+        .catch(() => false);
+}

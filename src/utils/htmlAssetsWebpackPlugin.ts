@@ -5,7 +5,7 @@ export default class HtmlAssetsWebpackPlugin {
     public constructor() {}
 
     public apply(compiler: Compiler) {
-        compiler.plugin("make", (compilation, callback) => {
+        compiler.plugin("make", (compilation, makeCallback) => {
             compilation.plugin(
                 "html-webpack-plugin-before-html-processing",
                 function(htmlPluginData, callback) {
@@ -24,7 +24,7 @@ export default class HtmlAssetsWebpackPlugin {
                 }
             );
 
-            callback();
+            makeCallback();
         });
     }
 }

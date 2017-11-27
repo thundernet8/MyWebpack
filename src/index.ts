@@ -68,7 +68,7 @@ yargs
         }
     )
     .command(
-        ["analyze"],
+        ["init"],
         "Initialize multi-entries webpack project",
         args => args,
         argv => {
@@ -77,8 +77,8 @@ yargs
         }
     )
     .command(
-        ["routes"],
-        "Generate routes and entries",
+        ["gen"],
+        "Generate entries",
         args => args,
         argv => {
             console.log("Generate routes and entries from routes.yml");

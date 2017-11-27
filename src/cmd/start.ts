@@ -18,7 +18,7 @@ enum EntryTaskStatus {
 class EntryTaskManager {
     private mpkConfig;
     private webpackConfig;
-    private compiler: Compiler;
+    private compiler: Compiler & { context: string };
     private devMiddleware;
     private allEntries: IEntry[] = [];
     private allEntryNames: string[] = [];
@@ -32,7 +32,7 @@ class EntryTaskManager {
     public constructor(
         mpkConfig,
         webpackConfig,
-        compiler: Compiler,
+        compiler: Compiler & { context: string },
         devMiddleware,
         allEntries: IEntry[],
         prebuildEntryNames: string[]
@@ -142,7 +142,7 @@ class EntryTaskManager {
                         hmrEntry.push(e.path);
                         return addWebpackEntry(
                             compilation,
-                            this["context"],
+                            compiler.context,
                             e.name,
                             hmrEntry
                         );
@@ -159,8 +159,9 @@ class EntryTaskManager {
         compiler.plugin("done", stats => {
             this.entryTaskQueue = [];
             emitter.emit("done");
-            this.prePackagesBuilt &&
+            if (this.prePackagesBuilt) {
                 log.success("\r\n🎉   Building successfully.");
+            }
         });
     }
 

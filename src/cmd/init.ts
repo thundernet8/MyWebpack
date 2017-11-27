@@ -1,10 +1,19 @@
 import * as path from "path";
 import * as vfs from "vinyl-fs";
-import { mkdirSync, writeFileSync, readFileSync } from "fs";
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from "fs";
 import * as prettier from "prettier";
 import * as inquirer from "inquirer";
 import log from "../utils/log";
-import { getPackagePath } from "../utils/path";
+import { getPackagePath, isDirectory } from "../utils/path";
+
+const pkg = require("../../package.json");
+
+async function safeMkdir(dir) {
+    const isDir = await isDirectory(dir);
+    if (!isDir) {
+        mkdirSync(dir);
+    }
+}
 
 function writeMpkConfig(filePath) {
     const prettierConfig = {
@@ -12,14 +21,60 @@ function writeMpkConfig(filePath) {
         useTabs: false,
         singleQuote: false,
         bracketSpacing: true,
-        parser: "javascript"
+        parser: "typescript"
     };
 
     const code = readFileSync(
         path.resolve(getPackagePath(), "./src/resources/mpk.config-sample.js")
     );
 
-    writeFileSync(filePath, prettier.format(code, prettierConfig));
+    writeFileSync(filePath, prettier.format(code.toString(), prettierConfig));
+}
+
+function writePackageJson(filePath) {
+    if (existsSync(filePath)) {
+        const json = JSON.parse(readFileSync(filePath).toString());
+        const sampleJson = JSON.parse(
+            readFileSync(
+                path.join(getPackagePath(), "src/resources/package.json")
+            ).toString()
+        );
+        json.scripts = Object.assign(
+            {},
+            json.scripts || {},
+            sampleJson.scripts
+        );
+        json.dependencies = json.dependencies || {};
+        json.dependencies.mywebpack = "^" + pkg.version;
+        json.devDependencies = Object.assign(
+            {},
+            json.devDependencies || {},
+            sampleJson.devDependencies
+        );
+
+        json["lint-staged"] = {
+            "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+        };
+        json["pre-commit"] = "lint-staged";
+
+        const prettierConfig = {
+            tabWidth: 2,
+            useTabs: false,
+            singleQuote: false,
+            bracketSpacing: true,
+            parser: "json"
+        };
+
+        writeFileSync(
+            filePath,
+            prettier.format(JSON.stringify(json), prettierConfig)
+        );
+    } else {
+        copyFile(
+            path.join(getPackagePath(), "src/resources/package.json"),
+            path.dirname(filePath)
+        );
+    }
 }
 
 function writeSampleEntryAndView(srcFolder) {
@@ -41,28 +96,12 @@ function writeSampleEntryAndView(srcFolder) {
 
     writeFileSync(
         path.join(srcFolder, "entries/A.ts"),
-        prettier.format(entryCode, prettierConfig)
+        prettier.format(entryCode.toString(), prettierConfig)
     );
     writeFileSync(
-        path.join(srcFolder, "views/A.ts"),
-        prettier.format(viewCode, prettierConfig)
+        path.join(srcFolder, "views/A.tsx"),
+        prettier.format(viewCode.toString(), prettierConfig)
     );
-}
-
-function writeSampleTemplate(filePath) {
-    const prettierConfig = {
-        tabWidth: 2,
-        useTabs: false,
-        singleQuote: false,
-        bracketSpacing: true,
-        parser: "html"
-    };
-
-    const html = readFileSync(
-        path.resolve(getPackagePath(), "./src/resources/index.html")
-    );
-
-    writeFileSync(filePath, prettier.format(html, prettierConfig));
 }
 
 function copyFile(from, to) {
@@ -86,26 +125,26 @@ export default async function init() {
 
     const currentPath = process.cwd();
     try {
-        mkdirSync(path.join(currentPath, "src"));
-        mkdirSync(path.join(currentPath, "src/assets"));
-        mkdirSync(path.join(currentPath, "src/assets/styles"));
-        mkdirSync(path.join(currentPath, "src/assets/styles/global"));
+        await safeMkdir(path.join(currentPath, "src"));
+        await safeMkdir(path.join(currentPath, "src/assets"));
+        await safeMkdir(path.join(currentPath, "src/assets/styles"));
+        await safeMkdir(path.join(currentPath, "src/assets/styles/global"));
         writeFileSync(
             path.join(currentPath, "src/assets/styles/global/index.less"),
-            `*,
-        *:before,
-        *:after {
-            box-sizing: border-box;
-        }`
+            `*,*:before,*:after { box-sizing: border-box;}`
         );
-        mkdirSync(path.join(currentPath, "src/assets/images"));
-        mkdirSync(path.join(currentPath, "src/assets/fonts"));
-        mkdirSync(path.join(currentPath, "src/entries"));
+        await safeMkdir(path.join(currentPath, "src/assets/images"));
+        await safeMkdir(path.join(currentPath, "src/assets/fonts"));
+        await safeMkdir(path.join(currentPath, "src/entries"));
+        await safeMkdir(path.join(currentPath, "src/views"));
         writeSampleEntryAndView(path.join(currentPath, "src"));
-        mkdirSync(path.join(currentPath, "src/templates"));
-        writeSampleTemplate(path.join(currentPath, "src/templates/index.html"));
-        mkdirSync(path.join(currentPath, "src/views"));
+        await safeMkdir(path.join(currentPath, "src/templates"));
         writeMpkConfig(path.join(currentPath, "mpk.config.js"));
+        writePackageJson(path.join(currentPath, "package.json"));
+        copyFile(
+            path.join(getPackagePath(), "./src/resources/index.html"),
+            path.join(currentPath, "src/templates/index.html")
+        );
         copyFile(
             path.join(getPackagePath(), "src/resources/entry.yml"),
             currentPath
@@ -115,16 +154,13 @@ export default async function init() {
             currentPath
         );
         copyFile(
-            path.join(getPackagePath(), "src/resources/package.json"),
-            currentPath
-        );
-        copyFile(
             path.join(getPackagePath(), "src/resources/Makefile"),
             currentPath
         );
     } catch (err) {
         log.error(err.message || err.toString());
-        return;
+        throw err;
+        // return;
     }
 
     log.success(`\r\n🎉  Initialize project done.`);

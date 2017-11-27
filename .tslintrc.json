@@ -28,7 +28,7 @@
             true,
             "debug",
             "info",
-            "log",
+            // "log",
             "time",
             "timeEnd",
             "trace"
