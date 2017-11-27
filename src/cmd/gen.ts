@@ -19,7 +19,10 @@ export default function gen(config) {
             exact,
             componentName: chunk
                 .split("")
-                .map((item, index) => (index === 0 ? item.toUpperCase() : item))
+                .map(
+                    (letter, index) =>
+                        index === 0 ? letter.toUpperCase() : letter
+                )
                 .join("")
         };
     });

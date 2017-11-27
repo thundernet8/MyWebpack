@@ -12,7 +12,7 @@ function render(App: any) {
 
 render(A);
 
-//accept self
+// accept self
 if (module.hot) {
     module.hot.accept(() => {
         render(A);

@@ -13,7 +13,7 @@ import log from "../utils/log";
 inquirer.registerPrompt("SearchCheckbox", SearchCheckbox);
 
 export interface IBuildResult {
-    compiler: Compiler;
+    compiler: Compiler & { context: string };
     webpackConfig;
     allEntries: IEntry[];
     entries: IEntry[];
@@ -22,7 +22,7 @@ export interface IBuildResult {
 function _build(
     config,
     cb?: (
-        compiler: Compiler,
+        compiler: Compiler & { context: string },
         webpackConfig,
         allEntries: IEntry[],
         entries: IEntry[]
@@ -53,7 +53,7 @@ function _build(
         }, {});
     } else {
         webpackEntry = {};
-        webpackEntry["empty"] = getEmptyEntry();
+        webpackEntry.empty = getEmptyEntry();
     }
 
     config.webpack.entry = webpackEntry;
@@ -150,7 +150,7 @@ export default async function build(config) {
             _build(
                 config,
                 (
-                    compiler: Compiler,
+                    compiler: Compiler & { context: string },
                     webpackConfig: any,
                     allEntries: IEntry[],
                     entries: IEntry[]

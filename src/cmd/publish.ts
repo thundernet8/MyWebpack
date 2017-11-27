@@ -17,9 +17,10 @@ export default async function publish(config) {
     const isProd = currentBranch === "master";
 
     let publishRepoPath;
+    let answers;
 
     if (isProd) {
-        const answers = await inquirer.prompt([
+        answers = await inquirer.prompt([
             {
                 type: "confirm",
                 name: "isProd",
@@ -74,7 +75,7 @@ export default async function publish(config) {
 
     vfs.src(path.join(distFullPath, "**/*")).pipe(vfs.dest(publishRepoPath));
 
-    const answers = await inquirer.prompt([
+    answers = await inquirer.prompt([
         {
             type: "confirm",
             name: "isPublish",
