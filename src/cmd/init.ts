@@ -123,7 +123,7 @@ export default async function init() {
         return;
     }
 
-    const currentPath = process.cwd() + "/.mpk";
+    const currentPath = process.cwd();
     try {
         await safeMkdir(path.join(currentPath, "src"));
         await safeMkdir(path.join(currentPath, "src/assets"));
