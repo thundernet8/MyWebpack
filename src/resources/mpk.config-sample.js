@@ -10,6 +10,7 @@ module.exports = {
         // distribution files folder(relative to project root)
         distPath: "dist",
         // html templates folder(relative to project root)
+        // note: search template html file with same name of entryName first, and `index.html` as alternative
         template: "src/templates",
         // values inject to generated html
         htmlInjects: {},
