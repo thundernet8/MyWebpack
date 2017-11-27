@@ -90,13 +90,10 @@ class EntryTaskManager {
     }
 
     private addHtmlPage(entryName) {
-        // if (this.builtEntryNames.includes(entryName)) {
-        //     return;
-        // }
         const { publicPath, filename } = this.webpackConfig.output;
         this.compiler.apply(
             getHtmlWebpackPluginInstance(this.mpkConfig, {
-                template: "index.html",
+                template: `${entryName}.html`,
                 name: entryName,
                 src: publicPath + filename.replace("[name]", entryName)
             })

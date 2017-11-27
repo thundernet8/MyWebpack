@@ -1,5 +1,7 @@
 import * as path from "path";
 import * as webpack from "webpack";
+import { isFileSync } from "../utils/path";
+
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
@@ -26,6 +28,19 @@ export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
     );
 
     const { htmlInjects } = mpkConfig.mpk;
+    let templatePath = path.resolve(
+        mpkConfig.root,
+        mpkConfig.mpk.template,
+        entry.template
+    );
+
+    if (!isFileSync(templatePath)) {
+        templatePath = path.resolve(
+            mpkConfig.root,
+            mpkConfig.mpk.template,
+            "index.html"
+        );
+    }
 
     return new HtmlWebpackPlugin(
         Object.assign({}, htmlInjects, {
@@ -77,7 +92,7 @@ export default function(mpkConfig) {
                 const entryName = e.split(".")[0];
                 plugins.push(
                     getHtmlWebpackPluginInstance(mpkConfig, {
-                        template: "index.html",
+                        template: `${entryName}.html`,
                         name: entryName
                     })
                 );

@@ -1,4 +1,5 @@
 import * as path from "path";
+import * as fs from "fs";
 import * as fse from "fs-extra";
 
 export function getPackagePath() {
@@ -34,4 +35,13 @@ export function isFile(filePath) {
             return false;
         })
         .catch(() => false);
+}
+
+export function isFileSync(filePath) {
+    try {
+        const stats = fs.lstatSync(filePath);
+        return stats.isFile();
+    } catch (e) {
+        return false;
+    }
 }

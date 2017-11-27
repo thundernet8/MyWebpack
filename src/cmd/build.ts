@@ -64,6 +64,7 @@ function _build(
 
     const callback = function(err, stats, end: boolean = true) {
         if (err) {
+            log.error(err.message || err.toString());
             throw new Error(err);
         } else {
             console.log(
