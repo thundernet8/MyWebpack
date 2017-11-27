@@ -1,8 +1,7 @@
 {
     "name": "mywebpack",
     "version": "0.0.2",
-    "description":
-        "My webpack integrated CLI for multi-entries and collaborative projects",
+    "description": "My webpack integrated CLI for multi-entries and collaborative projects",
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",
     "repository": "git@github.com:thundernet8/MyWebpack.git",
@@ -15,17 +14,16 @@
         "build": "rimraf lib && tsc && cp src/index.d.ts lib/",
         "lint": "tslint -e node_modules typings -c .tslintrc.json src/**/*.ts",
         "prepublish": "npm run build",
-        "test:build":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk build -c tests/mpk.config.js",
-        "test:publish":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk publish -c tests/mpk.config.js",
-        "test:start":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk start -c tests/mpk.config.js",
-        "test:analyze":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk analyze -c tests/mpk.config.js"
+        "test:build": "rimraf dist && rimraf lib && npm run build && ./bin/mpk build -c tests/mpk.config.js",
+        "test:publish": "rimraf dist && rimraf lib && npm run build && ./bin/mpk publish -c tests/mpk.config.js",
+        "test:start": "rimraf dist && rimraf lib && npm run build && ./bin/mpk start -c tests/mpk.config.js",
+        "test:analyze": "rimraf dist && rimraf lib && npm run build && ./bin/mpk analyze -c tests/mpk.config.js",
+        "test:init": "rimraf dist && rimraf lib && npm run build && ./bin/mpk init"
     },
     "lint-staged": {
-        "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+        "src/**/*.{ts,tsx}": [
+            "lint-staged:ts"
+        ]
     },
     "pre-commit": "lint-staged",
     "dependencies": {
@@ -64,6 +62,7 @@
         "webpackstablechunkid": "^0.2.0"
     },
     "devDependencies": {
+        "@types/fs-extra": "^4.0.5",
         "@types/node": "^8.0.53",
         "@types/webpack": "^3.8.1",
         "@types/yargs": "^8.0.2",
