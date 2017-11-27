@@ -4,6 +4,8 @@ import start from "./cmd/start";
 import build from "./cmd/build";
 import publish from "./cmd/publish";
 import analyze from "./cmd/analyse";
+import init from "./cmd/init";
+import routes from "./cmd/routes";
 
 const version = require("../package.json").version;
 
@@ -63,6 +65,24 @@ yargs
             process.env.NODE_ENV = "production";
             const config = loadConfig(argv.config);
             analyze(config);
+        }
+    )
+    .command(
+        ["analyze"],
+        "Initialize multi-entries webpack project",
+        args => args,
+        argv => {
+            console.log("Initialize multi-entries webpack project");
+            init();
+        }
+    )
+    .command(
+        ["routes"],
+        "Generate routes and entries",
+        args => args,
+        argv => {
+            console.log("Generate routes and entries from routes.yml");
+            routes();
         }
     )
     .usage("Usage: $0 <command> [options]")

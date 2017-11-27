@@ -22,8 +22,7 @@
         "test:start":
             "rimraf dist && rimraf lib && npm run build && ./bin/mpk start -c tests/mpk.config.js",
         "test:analyze":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk analyze -c tests/mpk.config.js",
-        "test": "node lib/test.js"
+            "rimraf dist && rimraf lib && npm run build && ./bin/mpk analyze -c tests/mpk.config.js"
     },
     "lint-staged": {
         "src/**/*.{ts,tsx}": ["lint-staged:ts"]
