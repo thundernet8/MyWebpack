@@ -1,9 +1,11 @@
 import * as yargs from "yargs";
-import * as path from "path";
 import loadConfig from "./config";
 import start from "./cmd/start";
 import build from "./cmd/build";
 import publish from "./cmd/publish";
+import analyze from "./cmd/analyse";
+import init from "./cmd/init";
+import gen from "./cmd/gen";
 
 const version = require("../package.json").version;
 
@@ -28,7 +30,7 @@ yargs
         args => args,
         argv => {
             const config = loadConfig(argv.config);
-            config.root = path.resolve(process.cwd());
+            process.env.NODE_ENV = "development";
             start(config);
         }
     )
@@ -38,7 +40,7 @@ yargs
         args => args,
         argv => {
             const config = loadConfig(argv.config);
-            config.root = path.resolve(process.cwd());
+            process.env.NODE_ENV = "production";
             build(config);
         }
     )
@@ -47,10 +49,41 @@ yargs
         "Publish project",
         args => args,
         argv => {
-            console.log("Build && Publish project");
+            console.log("Build & Publish project");
+            process.env.NODE_ENV = "production";
             const config = loadConfig(argv.config);
-            config.root = path.resolve(process.cwd());
             publish(config);
+        }
+    )
+    .command(
+        ["analyze"],
+        "Build and analyze",
+        args => args,
+        argv => {
+            console.log("Build & Analyze package bundles");
+            process.env.ANALYZE_ENV = "true";
+            process.env.NODE_ENV = "production";
+            const config = loadConfig(argv.config);
+            analyze(config);
+        }
+    )
+    .command(
+        ["analyze"],
+        "Initialize multi-entries webpack project",
+        args => args,
+        argv => {
+            console.log("Initialize multi-entries webpack project");
+            init();
+        }
+    )
+    .command(
+        ["routes"],
+        "Generate routes and entries",
+        args => args,
+        argv => {
+            console.log("Generate routes and entries from routes.yml");
+            const config = loadConfig(argv.config);
+            gen(config);
         }
     )
     .usage("Usage: $0 <command> [options]")

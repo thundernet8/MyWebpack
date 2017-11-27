@@ -52,7 +52,11 @@ function defaults(config) {
     };
     return Object.assign(
         {},
-        { mpk: defaultMpk, webpack: defaultWebpack },
+        {
+            mpk: defaultMpk,
+            webpack: defaultWebpack,
+            root: path.resolve(process.cwd())
+        },
         config
     );
 }

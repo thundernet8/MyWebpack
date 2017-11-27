@@ -2,10 +2,13 @@ import * as path from "path";
 import * as webpack from "webpack";
 const AssetsPlugin = require("assets-webpack-plugin");
 const WebpackStableChunkId = require("webpackstablechunkid");
-
-const isDev = process.env.NODE_ENV !== "production";
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+    .BundleAnalyzerPlugin;
 
 export default function getDllConfig(rawConfig) {
+    const isDev = process.env.NODE_ENV !== "production";
+    const { devHost, devPort } = rawConfig.mpk;
+
     const getPlugins = function() {
         let plugins = [
             new webpack.DllPlugin({
@@ -31,6 +34,16 @@ export default function getDllConfig(rawConfig) {
                 })
             ]);
         }
+
+        if (!!process.env.ANALYZE_ENV) {
+            plugins.push(
+                new BundleAnalyzerPlugin({
+                    analyzerHost: devHost,
+                    analyzerPort: Number(devPort) + 1
+                })
+            );
+        }
+
         return plugins;
     };
 

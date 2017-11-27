@@ -30,7 +30,7 @@ declare namespace MyWebpack {
             // dev server host
             devHost?: string;
             // dev server port
-            devPort?: string;
+            devPort?: number;
             // prepared packages for each webpack entry
             prePackages?: string[];
             // pre build entries for dev

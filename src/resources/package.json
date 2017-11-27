@@ -1,0 +1,33 @@
+{
+    "name": "your-project-name",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "repository": "",
+    "author": "",
+    "license": "",
+    "scripts": {
+        "lint": "tslint -e node_modules typings -c .tslintrc.json src/**/*.ts",
+        "prepublish": "npm run build",
+        "build": "mpk build -c mpk.config.js",
+        "publish": "mpk publish -c mpk.config.js",
+        "start": "mpk start -c mpk.config.js",
+        "analyze": "mpk analyze -c mpk.config.js",
+        "gen": "mpk gen"
+    },
+    "lint-staged": {
+        "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+    },
+    "pre-commit": "lint-staged",
+    "dependencies": {
+        "mywebpack": "^0.0.1",
+        "react": "^16.1.1",
+        "react-dom": "^16.1.1"
+    },
+    "devDependencies": {
+        "@types/node": "^8.0.53",
+        "lint-staged": "^5.0.0",
+        "rimraf": "^2.6.2",
+        "typescript": "^2.6.1"
+    }
+}
