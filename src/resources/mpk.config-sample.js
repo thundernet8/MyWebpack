@@ -16,7 +16,7 @@ module.exports = {
         // webpack publicPath
         publicPath: {
             dev: "/",
-            prod: "http://assets.sample.com/assets/"
+            prod: "http://assets.example.com/assets/"
         },
         // repository path for publishing assets
         publishPath: {

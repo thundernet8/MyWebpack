@@ -45,11 +45,11 @@ function writePackageJson(filePath) {
             sampleJson.scripts
         );
         json.dependencies = json.dependencies || {};
-        json.dependencies.mywebpack = "^" + pkg.version;
         json.devDependencies = Object.assign(
             {},
             json.devDependencies || {},
-            sampleJson.devDependencies
+            sampleJson.devDependencies,
+            { mywebpack: "^" + pkg.version }
         );
 
         json["lint-staged"] = {
@@ -143,10 +143,10 @@ export default async function init() {
         writePackageJson(path.join(currentPath, "package.json"));
         copyFile(
             path.join(getPackagePath(), "./src/resources/index.html"),
-            path.join(currentPath, "src/templates/index.html")
+            path.join(currentPath, "src/templates")
         );
         copyFile(
-            path.join(getPackagePath(), "src/resources/entry.yml"),
+            path.join(getPackagePath(), "src/resources/entry.yaml"),
             currentPath
         );
         copyFile(
@@ -159,8 +159,7 @@ export default async function init() {
         );
     } catch (err) {
         log.error(err.message || err.toString());
-        throw err;
-        // return;
+        return;
     }
 
     log.success(`\r\n🎉  Initialize project done.`);

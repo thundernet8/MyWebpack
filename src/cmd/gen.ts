@@ -2,12 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 import * as yaml from "js-yaml";
 import * as prettier from "prettier";
+import log from "../utils/log";
 
 export default function gen(config) {
     const { entryRoot } = config.mpk;
 
     // generate entries
-    const yamlFile = fs.readFileSync(path.join(process.cwd(), "routes.yaml"));
+    const yamlFile = fs.readFileSync(path.join(process.cwd(), "entry.yaml"));
     const yamlContent = yaml.safeLoad(yamlFile);
 
     const entries = yamlContent.map(item => {
@@ -45,7 +46,6 @@ export default function gen(config) {
 
         code.push(`import * as React from "react";
         import * as ReactDOM from "react-dom";
-
         import ${route.componentName} from "../views/${route.chunk}";
 
         declare var module;
@@ -73,4 +73,6 @@ export default function gen(config) {
             prettier.format(code.join(""), prettierConfig)
         );
     });
+
+    log.success(`\r\n🎉  Generated ${entries.length} entries successfully.`);
 }
