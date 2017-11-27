@@ -1,9 +1,9 @@
 import * as yargs from "yargs";
-import * as path from "path";
 import loadConfig from "./config";
 import start from "./cmd/start";
 import build from "./cmd/build";
 import publish from "./cmd/publish";
+import analyze from "./cmd/analyse";
 
 const version = require("../package.json").version;
 
@@ -28,7 +28,7 @@ yargs
         args => args,
         argv => {
             const config = loadConfig(argv.config);
-            config.root = path.resolve(process.cwd());
+            process.env.NODE_ENV = "development";
             start(config);
         }
     )
@@ -38,7 +38,7 @@ yargs
         args => args,
         argv => {
             const config = loadConfig(argv.config);
-            config.root = path.resolve(process.cwd());
+            process.env.NODE_ENV = "production";
             build(config);
         }
     )
@@ -47,10 +47,22 @@ yargs
         "Publish project",
         args => args,
         argv => {
-            console.log("Build && Publish project");
+            console.log("Build & Publish project");
+            process.env.NODE_ENV = "production";
             const config = loadConfig(argv.config);
-            config.root = path.resolve(process.cwd());
             publish(config);
+        }
+    )
+    .command(
+        ["analyze"],
+        "Build and analyze",
+        args => args,
+        argv => {
+            console.log("Build & Analyze package bundles");
+            process.env.ANALYZE_ENV = "true";
+            process.env.NODE_ENV = "production";
+            const config = loadConfig(argv.config);
+            analyze(config);
         }
     )
     .usage("Usage: $0 <command> [options]")

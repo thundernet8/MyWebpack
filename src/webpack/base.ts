@@ -13,9 +13,9 @@ export interface IEntryInfo {
     src?: string;
 }
 
-const isDev = process.env.NODE_ENV !== "production";
-
 export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
+    const isDev = process.env.NODE_ENV !== "production";
+
     const vendersConfig = require(path.resolve(
         mpkConfig.root,
         ".mpk/venders-config.json"
@@ -46,11 +46,8 @@ export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
     );
 }
 
-export default function(
-    mpkConfig
-    // outputs?: { template: string; filename: string }[]
-) {
-    // outputs = outputs || [{ template: "index.html", filename: "index.html" }];
+export default function(mpkConfig) {
+    const isDev = process.env.NODE_ENV !== "production";
 
     const getPlugins = function() {
         let plugins = [
@@ -61,7 +58,6 @@ export default function(
                         : JSON.stringify("production")
                 }
             }),
-            // new SimpleProgressWebpackPlugin(),
             new webpack.DllReferencePlugin({
                 context: __dirname,
                 manifest: require(path.resolve(
@@ -75,7 +71,7 @@ export default function(
             // }),
         ];
 
-        const { initEntries } = mpkConfig.mpk;
+        const { initEntries, devHost, devPort } = mpkConfig.mpk;
         if (!isDev && Array.isArray(initEntries) && initEntries.length > 0) {
             initEntries.forEach(e => {
                 const entryName = e.split(".")[0];
@@ -120,7 +116,12 @@ export default function(
         }
 
         if (!!process.env.ANALYZE_ENV) {
-            plugins.push(new BundleAnalyzerPlugin());
+            plugins.push(
+                new BundleAnalyzerPlugin({
+                    analyzerHost: devHost,
+                    analyzerPort: Number(devPort) + 2
+                })
+            );
         }
 
         if (mpkConfig.webpack.plugins) {

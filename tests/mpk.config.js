@@ -19,7 +19,7 @@ module.exports = {
             prod: "../publishRepo"
         },
         devHost: "localhost",
-        devPort: "9000",
+        devPort: 9000,
         prePackages: ["babel-polyfill"],
         initEntries: ["businessA.ts", "businessB.ts"],
         entryRoot: "tests/proj/src/entries"
