@@ -154,6 +154,10 @@ export default async function init() {
             currentPath
         );
         copyFile(
+            path.join(getPackagePath(), "src/resources/tslintrc.json"),
+            currentPath
+        );
+        copyFile(
             path.join(getPackagePath(), "src/resources/Makefile"),
             currentPath
         );
