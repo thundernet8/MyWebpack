@@ -6,8 +6,8 @@
 
 [![npm version](https://img.shields.io/npm/v/mywebpack.svg?maxAge=3600&style=flat)](https://www.npmjs.com/package/mywebpack)
 [![dependency status](https://img.shields.io/david/thundernet8/mywebpack.svg?maxAge=3600&style=flat)](https://david-dm.org/thundernet8/mywebpack)
-[![travis ci build status](https://img.shields.io/travis/thundernet8/mywebpack/master.svg?maxAge=3600&style=flat)](https://travis-ci.org/thundernet8/MyWebpack)
-[![license](https://img.shields.io/npm/l/MyWebpack.svg?maxAge=3600&style=flat)](https://github.com/thundernet8/MyWebpack/LICENSE)
+[![Build Status](https://travis-ci.org/thundernet8/MyWebpack.svg?branch=master)](https://travis-ci.org/thundernet8/MyWebpack)
+[![GitHub license](https://img.shields.io/github/license/thundernet8/MyWebpack.svg)](https://github.com/thundernet8/MyWebpack/blob/master/LICENSE)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 </div>
