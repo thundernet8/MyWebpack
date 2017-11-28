@@ -14,16 +14,8 @@ yargs
     .alias("v", "version")
     .alias("h", "help")
     .alias("c", "config")
-    .command(
-        "$0",
-        "The default command",
-        args => args,
-        argv => {
-            console.log(
-                `Please specify a command, e.g ${argv.$0} start/build/publish`
-            );
-        }
-    )
+    .showHelpOnFail(true)
+    .demandCommand(1, "")
     .command(
         ["start"],
         "Start dev server",
