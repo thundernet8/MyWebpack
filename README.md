@@ -16,13 +16,16 @@
 
 多入口 Webpack 项目集成开发工具链。
 
-## Feature
+## Features
 
 * [x] 初始化项目结构 CLI，提供从 yaml 定义自动生成 entries 文件
 * [x] 提供多个命令分别支持项目开发环境，编译以及测试或生产发布，提供 bundle 分析
       功能
 * [x] 开发环境，提供自动编译功能：根据访问的页面自动编译需要的 entry 相关代码，
       按需编译，加快开发编译等待时间
+* [x] 编译 bundles，可指定将常用的`venders`库打包为`dll bundle`，其他页面逻辑代
+      码打包为`[entryName].[contentHash]`对应的 bundle，最小化文件改动，最大化利
+      用资源缓存
 * [x] 发布文件，支持多选或全选 entries 进行发布，按需发布，加快发布速度，并自动
       推送至指定的部署仓库，实现持续集成和交付
 
@@ -64,6 +67,12 @@ mpk start
 mpk build
 ```
 
+* 分析
+
+```typescript
+mpk analyze
+```
+
 * 发布
 
 ```typescript
@@ -71,6 +80,16 @@ mpk publish
 ```
 
 请定义项目根目录的`mpk.config.js`
+
+## Notes
+
+* React+TypeScript+LESS/SASS/CSS 栈
+* 默认会查找与 entry 同名的 html 模板文件，不存在则会使用 index.html
+* 项目初始化的结构`src/assets/styles/global`文件夹下的样式文件不会应用`CSS
+  Module`，其他地方引用样式会应用`CSS Module`解析
+* 配置文件中`webpack`配置项可配置`externals`与`resolve`
+* `Bundle analyzer`会使用开发相同的`devHost`, `dll bundles`使用`devPort`+1 端口
+  ，其他`bundles`使用`devPort`+2 端口
 
 ## License
 
