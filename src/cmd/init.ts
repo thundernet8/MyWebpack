@@ -158,6 +158,10 @@ export default async function init() {
             currentPath
         );
         copyFile(
+            path.join(getPackagePath(), "src/resources/.stylelintrc"),
+            currentPath
+        );
+        copyFile(
             path.join(getPackagePath(), "src/resources/Makefile"),
             currentPath
         );

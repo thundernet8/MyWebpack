@@ -1,8 +1,7 @@
 {
     "name": "mywebpack",
     "version": "0.1.0",
-    "description":
-        "My webpack integrated CLI for multi-entries and collaborative projects",
+    "description": "My webpack integrated CLI for multi-entries and collaborative projects",
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",
     "repository": "git@github.com:thundernet8/MyWebpack.git",
@@ -17,19 +16,16 @@
         "lint-staged": "lint-staged",
         "lint-staged:ts": "tslint --fix -c .tslintrc.json",
         "prepublish": "npm run build",
-        "test:build":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk build -c tests/mpk.config.js",
-        "test:publish":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk publish -c tests/mpk.config.js",
-        "test:start":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk start -c tests/mpk.config.js",
-        "test:analyze":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk analyze -c tests/mpk.config.js",
-        "test:init":
-            "rimraf dist && rimraf lib && npm run build && ./bin/mpk init"
+        "test:build": "rimraf dist && rimraf lib && npm run build && ./bin/mpk build -c tests/mpk.config.js",
+        "test:publish": "rimraf dist && rimraf lib && npm run build && ./bin/mpk publish -c tests/mpk.config.js",
+        "test:start": "rimraf dist && rimraf lib && npm run build && ./bin/mpk start -c tests/mpk.config.js",
+        "test:analyze": "rimraf dist && rimraf lib && npm run build && ./bin/mpk analyze -c tests/mpk.config.js",
+        "test:init": "rimraf dist && rimraf lib && npm run build && ./bin/mpk init"
     },
     "lint-staged": {
-        "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+        "src/**/*.{ts,tsx}": [
+            "lint-staged:ts"
+        ]
     },
     "pre-commit": "lint-staged",
     "dependencies": {
@@ -61,6 +57,7 @@
         "simple-git": "^1.82.0",
         "style-loader": "^0.19.0",
         "stylelint": "^8.3.1",
+        "stylelint-config-standard": "^18.0.0",
         "ts-loader": "^3.1.1",
         "tslint": "^5.8.0",
         "tslint-eslint-rules": "^4.1.1",
