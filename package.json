@@ -1,7 +1,8 @@
 {
     "name": "mywebpack",
-    "version": "0.1.0",
-    "description": "My webpack integrated CLI for multi-entries and collaborative projects",
+    "version": "0.2.0",
+    "description":
+        "My webpack integrated CLI for multi-entries and collaborative projects",
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",
     "repository": "git@github.com:thundernet8/MyWebpack.git",
@@ -16,16 +17,19 @@
         "lint-staged": "lint-staged",
         "lint-staged:ts": "tslint --fix -c .tslintrc.json",
         "prepublish": "npm run build",
-        "test:build": "rimraf dist && rimraf lib && npm run build && ./bin/mpk build -c tests/mpk.config.js",
-        "test:publish": "rimraf dist && rimraf lib && npm run build && ./bin/mpk publish -c tests/mpk.config.js",
-        "test:start": "rimraf dist && rimraf lib && npm run build && ./bin/mpk start -c tests/mpk.config.js",
-        "test:analyze": "rimraf dist && rimraf lib && npm run build && ./bin/mpk analyze -c tests/mpk.config.js",
-        "test:init": "rimraf dist && rimraf lib && npm run build && ./bin/mpk init"
+        "test:build":
+            "rimraf dist && rimraf lib && npm run build && ./bin/mpk build -c tests/mpk.config.js",
+        "test:publish":
+            "rimraf dist && rimraf lib && npm run build && ./bin/mpk publish -c tests/mpk.config.js",
+        "test:start":
+            "rimraf dist && rimraf lib && npm run build && ./bin/mpk start -c tests/mpk.config.js",
+        "test:analyze":
+            "rimraf dist && rimraf lib && npm run build && ./bin/mpk analyze -c tests/mpk.config.js",
+        "test:init":
+            "rimraf dist && rimraf lib && npm run build && ./bin/mpk init"
     },
     "lint-staged": {
-        "src/**/*.{ts,tsx}": [
-            "lint-staged:ts"
-        ]
+        "src/**/*.{ts,tsx}": ["lint-staged:ts"]
     },
     "pre-commit": "lint-staged",
     "dependencies": {
