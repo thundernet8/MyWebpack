@@ -13,7 +13,8 @@
         "publish": "mpk publish -c mpk.config.js",
         "start": "mpk start -c mpk.config.js",
         "analyze": "mpk analyze -c mpk.config.js",
-        "gen": "mpk gen"
+        "gen": "mpk gen",
+        "pretty": "mpk pretty"
     },
     "lint-staged": {
         "src/**/*.{ts,tsx}": ["lint-staged:ts"]

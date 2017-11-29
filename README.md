@@ -28,6 +28,7 @@
       用资源缓存
 * [x] 发布文件，支持多选或全选 entries 进行发布，按需发布，加快发布速度，并自动
       推送至指定的部署仓库，实现持续集成和交付
+* [x] 代码格式化，集成`Prettier`，统一协作开发者提交的代码风格
 
 ## Install
 
@@ -71,6 +72,12 @@ mpk build
 
 ```typescript
 mpk analyze
+```
+
+* 格式化
+
+```typescript
+mpk pretty
 ```
 
 * 发布
