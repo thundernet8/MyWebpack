@@ -39,6 +39,9 @@ declare namespace MyWebpack {
             entryRoot: string;
         };
         webpack: {
+            devtool?: string | false;
+            entry?: { [name: string]: string | string[] };
+            node?: { __dirname: boolean; __filename: boolean };
             resolve?: {
                 extensions?: [
                     ".json",
@@ -55,6 +58,8 @@ declare namespace MyWebpack {
             };
             target?: string;
             externals?: { [library: string]: string };
+            plugins: any[];
+            rules: any[];
         };
     }
 }

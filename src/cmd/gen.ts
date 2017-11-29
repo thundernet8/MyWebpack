@@ -3,8 +3,9 @@ import * as path from "path";
 import * as yaml from "js-yaml";
 import * as prettier from "prettier";
 import log from "../utils/log";
+import { IMPKConfig } from "../index.d";
 
-export default function gen(config) {
+export default function gen(config: IMPKConfig) {
     const { entryRoot } = config.mpk;
 
     // generate entries

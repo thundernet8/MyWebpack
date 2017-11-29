@@ -6,8 +6,9 @@ import build from "./build";
 import log from "../utils/log";
 import GitHelper from "../utils/git";
 import { isDirectory } from "../utils/path";
+import { IMPKConfig } from "../index.d";
 
-export default async function publish(config) {
+export default async function publish(config: IMPKConfig) {
     const { publishPath, distPath } = config.mpk;
     const currentPath = config.root;
     const distFullPath = path.resolve(currentPath, distPath);

@@ -6,6 +6,7 @@ import publish from "./cmd/publish";
 import analyze from "./cmd/analyse";
 import init from "./cmd/init";
 import gen from "./cmd/gen";
+import pretty from "./cmd/pretty";
 
 const version = require("../package.json").version;
 
@@ -76,6 +77,15 @@ yargs
             console.log("Generate routes and entries from routes.yml");
             const config = loadConfig(argv.config);
             gen(config);
+        }
+    )
+    .command(
+        ["pretty"],
+        "Pretty code styles",
+        args => args,
+        argv => {
+            const config = loadConfig(argv.config);
+            pretty(config);
         }
     )
     .usage("Usage: $0 <command> [options]")

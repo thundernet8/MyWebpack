@@ -1,10 +1,11 @@
 import * as path from "path";
 import baseConf from "./base";
+import { IMPKConfig } from "../index.d";
 
-export default function getDevConfig(mpkConfig) {
-    let devConfig: any = baseConf(mpkConfig);
-    const { devHost, devPort, prePackages } = mpkConfig.mpk;
-    const { entry } = mpkConfig.webpack;
+export default function getDevConfig(rawConfig: IMPKConfig) {
+    let devConfig: any = baseConf(rawConfig);
+    const { devHost, devPort, prePackages } = rawConfig.mpk;
+    const { entry } = rawConfig.webpack;
     const hmrEntry = [
         `webpack-hot-middleware/client?path=${
             devHost.startsWith("http") ? devHost : "http://" + devHost
@@ -31,15 +32,15 @@ export default function getDevConfig(mpkConfig) {
     }
 
     devConfig.output = {
-        path: path.resolve(mpkConfig.root, mpkConfig.mpk.distPath),
-        publicPath: mpkConfig.mpk.publicPath.dev,
+        path: path.resolve(rawConfig.root, rawConfig.mpk.distPath),
+        publicPath: rawConfig.mpk.publicPath.dev,
         filename: "js/[name].js",
         chunkFilename: "js/[name].chunk.js"
     };
 
     devConfig.devtool = "#source-map"; // '#eval-source-map'
     devConfig.devServer = {
-        contentBase: path.resolve(mpkConfig.root, mpkConfig.mpk.distPath),
+        contentBase: path.resolve(rawConfig.root, rawConfig.mpk.distPath),
         compress: true,
         host: devHost.startsWith("http") ? devHost : "http://" + devHost,
         port: devPort,

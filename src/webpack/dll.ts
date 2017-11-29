@@ -1,11 +1,13 @@
 import * as path from "path";
 import * as webpack from "webpack";
+import { IMPKConfig } from "../index.d";
+
 const AssetsPlugin = require("assets-webpack-plugin");
 const WebpackStableChunkId = require("webpackstablechunkid");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
     .BundleAnalyzerPlugin;
 
-export default function getDllConfig(rawConfig) {
+export default function getDllConfig(rawConfig: IMPKConfig) {
     const isDev = process.env.NODE_ENV !== "production";
     const { devHost, devPort } = rawConfig.mpk;
 
