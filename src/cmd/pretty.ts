@@ -29,22 +29,22 @@ export default function pretty(config?: IMPKConfig) {
         walkSync(
             path.join(scanDir),
             ".(ts|tsx|js|jsx|json)$",
-            (path: string, stats) => {
+            (filePath: string, stats) => {
                 if (stats.isFile()) {
-                    if (/\.(ts|tsx|js|jsx)$/i.test(path)) {
-                        const code = readFileSync(path).toString();
+                    if (/\.(ts|tsx|js|jsx)$/i.test(filePath)) {
+                        const code = readFileSync(filePath).toString();
                         writeFileSync(
-                            path,
+                            filePath,
                             prettier.format(code, scriptPrettierConfig)
                         );
-                        console.log(`Pretty: ${path}`);
-                    } else if (/\.json$/i.test(path)) {
-                        const code = readFileSync(path).toString();
+                        console.log(`Pretty: ${filePath}`);
+                    } else if (/\.json$/i.test(filePath)) {
+                        const code = readFileSync(filePath).toString();
                         writeFileSync(
-                            path,
+                            filePath,
                             prettier.format(code, jsonPrettierConfig)
                         );
-                        console.log(`Pretty: ${path}`);
+                        console.log(`Pretty: ${filePath}`);
                     }
                 }
             }
