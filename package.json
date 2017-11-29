@@ -1,6 +1,6 @@
 {
     "name": "mywebpack",
-    "version": "0.0.9",
+    "version": "0.1.0",
     "description":
         "My webpack integrated CLI for multi-entries and collaborative projects",
     "main": "./lib/index.js",
