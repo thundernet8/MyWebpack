@@ -8,6 +8,11 @@
     "license": "",
     "scripts": {
         "lint": "tslint -e node_modules typings -c .tslintrc.json src/**/*.ts",
+        "lint-staged": "lint-staged",
+        "lint-staged:ts": "tslint --fix -c .tslintrc.json",
+        "lint-staged:css": "stylelint --syntax css",
+        "lint-staged:less": "stylelint --syntax less",
+        "lint-staged:scss": "stylelint --syntax scss",
         "prepublish": "npm run build",
         "build": "mpk build -c mpk.config.js",
         "publish": "mpk publish -c mpk.config.js",
@@ -17,11 +22,14 @@
         "pretty": "mpk pretty"
     },
     "lint-staged": {
-        "src/**/*.{ts,tsx}": ["lint-staged:ts"]
+        "src/**/*.{ts,tsx}": ["lint-staged:ts"],
+        "src/**/*.css": ["lint-staged:css"],
+        "src/**/*.less": ["lint-staged:less"],
+        "src/**/*.scss": ["lint-staged:scss"]
     },
     "pre-commit": "lint-staged",
     "dependencies": {
-        "mywebpack": "^0.0.1",
+        "mywebpack": "^0.0.9",
         "react": "^16.1.1",
         "react-dom": "^16.1.1"
     },
