@@ -1,11 +1,12 @@
 import * as path from "path";
 import baseConf from "./base";
+import { IMPKConfig } from "../index.d";
 import HtmlAssetsWebpackPlugin from "../utils/htmlAssetsWebpackPlugin";
 
-export default function getProdConfig(mpkConfig) {
-    let prodConfig: any = baseConf(mpkConfig);
-    const { prePackages } = mpkConfig.mpk;
-    const { entry } = mpkConfig.webpack;
+export default function getProdConfig(rawConfig: IMPKConfig) {
+    let prodConfig: any = baseConf(rawConfig);
+    const { prePackages } = rawConfig.mpk;
+    const { entry } = rawConfig.webpack;
 
     if (Array.isArray(entry)) {
         prodConfig.entry = Array.from(new Set(prePackages.concat(entry)));
@@ -25,17 +26,17 @@ export default function getProdConfig(mpkConfig) {
         });
     }
 
-    prodConfig.entry = mpkConfig.webpack.entry;
+    prodConfig.entry = rawConfig.webpack.entry;
     prodConfig.output = {
-        path: path.resolve(mpkConfig.root, mpkConfig.mpk.distPath),
-        publicPath: mpkConfig.mpk.publicPath.prod,
+        path: path.resolve(rawConfig.root, rawConfig.mpk.distPath),
+        publicPath: rawConfig.mpk.publicPath.prod,
         filename: "js/[name].[chunkhash:8].js",
         chunkFilename: "js/[name].[chunkhash:8].chunk.js"
     };
 
     prodConfig.plugins.push(new HtmlAssetsWebpackPlugin());
 
-    Object.keys(mpkConfig.webpack).forEach(key => {
+    Object.keys(rawConfig.webpack).forEach(key => {
         if (
             ![
                 "entry",
@@ -46,7 +47,7 @@ export default function getProdConfig(mpkConfig) {
                 "resolve"
             ].includes(key)
         ) {
-            prodConfig[key] = mpkConfig.webpack[key];
+            prodConfig[key] = rawConfig.webpack[key];
         }
     });
 

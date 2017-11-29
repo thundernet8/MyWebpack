@@ -8,6 +8,7 @@ import { IEntry, addWebpackEntry } from "../utils/entry";
 import { getHtmlWebpackPluginInstance } from "../webpack/base";
 import log from "../utils/log";
 import build from "./build";
+import { IMPKConfig } from "../index.d";
 
 enum EntryTaskStatus {
     BUILT,
@@ -205,7 +206,7 @@ class EntryTaskManager {
     }
 }
 
-export default function start(config) {
+export default function start(config: IMPKConfig) {
     return build(config).then(result => {
         const { compiler, webpackConfig, allEntries } = result;
         const prebuildEntries = result.entries;

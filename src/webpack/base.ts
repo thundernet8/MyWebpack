@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as webpack from "webpack";
 import { isFileSync } from "../utils/path";
+import { IMPKConfig } from "../index.d";
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
@@ -15,11 +16,14 @@ export interface IEntryInfo {
     src?: string;
 }
 
-export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
+export function getHtmlWebpackPluginInstance(
+    rawConfig: IMPKConfig,
+    entry: IEntryInfo
+) {
     const isDev = process.env.NODE_ENV !== "production";
 
     const vendersConfig = require(path.resolve(
-        mpkConfig.root,
+        rawConfig.root,
         ".mpk/venders-config.json"
     ));
 
@@ -27,17 +31,17 @@ export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
         key => vendersConfig[key].js
     );
 
-    const { htmlInjects } = mpkConfig.mpk;
+    const { htmlInjects } = rawConfig.mpk;
     let templatePath = path.resolve(
-        mpkConfig.root,
-        mpkConfig.mpk.template,
+        rawConfig.root,
+        rawConfig.mpk.template,
         entry.template
     );
 
     if (!isFileSync(templatePath)) {
         templatePath = path.resolve(
-            mpkConfig.root,
-            mpkConfig.mpk.template,
+            rawConfig.root,
+            rawConfig.mpk.template,
             "index.html"
         );
     }
@@ -46,12 +50,12 @@ export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
         Object.assign({}, htmlInjects, {
             title: entry.name,
             filename: path.resolve(
-                mpkConfig.mpk.distPath,
+                rawConfig.mpk.distPath,
                 entry.name + ".html"
             ),
             template: path.resolve(
-                mpkConfig.root,
-                mpkConfig.mpk.template,
+                rawConfig.root,
+                rawConfig.mpk.template,
                 entry.template
             ),
             inject: !isDev,
@@ -61,7 +65,7 @@ export function getHtmlWebpackPluginInstance(mpkConfig, entry: IEntryInfo) {
     );
 }
 
-export default function(mpkConfig) {
+export default function(mpkConfig: IMPKConfig) {
     const isDev = process.env.NODE_ENV !== "production";
 
     const getPlugins = function() {

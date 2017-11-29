@@ -9,6 +9,7 @@ import getProdConfig from "../webpack/prod";
 import { IEntry, scanEntries } from "../utils/entry";
 import { getEmptyEntry } from "../utils/path";
 import log from "../utils/log";
+import { IMPKConfig } from "../index.d";
 
 inquirer.registerPrompt("SearchCheckbox", SearchCheckbox);
 
@@ -20,7 +21,7 @@ export interface IBuildResult {
 }
 
 function _build(
-    config,
+    config: IMPKConfig,
     cb?: (
         compiler: Compiler & { context: string },
         webpackConfig,
@@ -103,7 +104,7 @@ function _build(
     });
 }
 
-export default async function build(config) {
+export default async function build(config: IMPKConfig) {
     const { root, mpk } = config;
     const { entryRoot } = mpk;
 
